@@ -41,6 +41,33 @@ Class {
 	#package : 'RoadTraffic-Tests'
 }
 
+{ #category : 'private' }
+RTPersonTest >> distanceOf: aPlot fromLineBetween: aCell and: anotherCell [
+	"In cells"
+
+	| a b p |
+	a := aCell rowNumber @ aCell columnNumber.
+	b := anotherCell rowNumber @ anotherCell columnNumber.
+	p := aPlot rowNumber @ aPlot columnNumber.
+	^ (p x - a x * (b y - a y) - (p y - a y * (b x - a x))) abs
+	  / ((b x - a x) squared + (b y - a y) squared) sqrt
+]
+
+{ #category : 'private' }
+RTPersonTest >> personOnSlopedRoadFrom: aHome to: aWorkplace [
+
+	| walker |
+	model newEntity: RTRoad from: aHome to: aWorkplace.
+	walker := model newEntity: RTPerson locatedAt: aHome.
+	model newEntity: RTHomeLink from: walker to: aHome.
+	model newEntity: RTWorkLink from: walker to: aWorkplace.
+	^ walker
+		  speed: 1;
+		  leaveHomeStep: 10;
+		  leaveWorkStep: 60;
+		  yourself
+]
+
 { #category : 'running' }
 RTPersonTest >> setUp [
 
@@ -147,6 +174,55 @@ RTPersonTest >> testStaysAtHomeBeforeLeaving [
 ]
 
 { #category : 'tests' }
+RTPersonTest >> testWalkingAlongTheLineStaysOnASlopedRoadAndArrives [
+
+	| from to walker |
+	from := model cellAt: 3 at: 1.
+	to := model cellAt: 5 at: 8.
+	walker := self personOnSlopedRoadFrom: from to: to.
+	self timeStep: 10.
+
+	7 timesRepeat: [
+			walker walkAlongTheLine.
+			self assert:
+				(self distanceOf: walker cell fromLineBetween: from and: to) < 1 ].
+
+	self assert: walker cell equals: to
+]
+
+{ #category : 'tests' }
+RTPersonTest >> testWalkingAlongTheLineWorksInBothDirections [
+
+	| from to walker |
+	from := model cellAt: 3 at: 1.
+	to := model cellAt: 5 at: 8.
+	walker := self personOnSlopedRoadFrom: from to: to.
+	self timeStep: 10.
+	7 timesRepeat: [ walker walkAlongTheLine ].
+
+	self timeStep: 61.
+	7 timesRepeat: [
+			walker walkAlongTheLine.
+			self assert:
+				(self distanceOf: walker cell fromLineBetween: from and: to) < 1 ].
+
+	self assert: walker cell equals: from
+]
+
+{ #category : 'tests' }
+RTPersonTest >> testWalkingWithMoveTowardsArrivesOnASlopedRoad [
+
+	| to walker |
+	to := model cellAt: 5 at: 8.
+	walker := self personOnSlopedRoadFrom: (model cellAt: 3 at: 1) to: to.
+	self timeStep: 10.
+
+	7 timesRepeat: [ walker walkWithMoveTowards ].
+
+	self assert: walker cell equals: to
+]
+
+{ #category : 'tests' }
 RTPersonTest >> testWalksOneCellPerStepAtSpeedOne [
 
 	self timeStep: 10.
@@ -178,5 +254,5 @@ RTPersonTest >> timeStep: aNumber [
 { #category : 'private' }
 RTPersonTest >> walkTimes: aNumber [
 
-	aNumber timesRepeat: [ person walk ]
+	aNumber timesRepeat: [ person walkWithMoveTowards ]
 ]

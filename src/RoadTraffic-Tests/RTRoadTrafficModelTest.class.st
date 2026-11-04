@@ -45,6 +45,29 @@ RTRoadTrafficModelTest >> assertEveryHomeReachesEveryWorkplaceAndBack [
 ]
 
 { #category : 'private' }
+RTRoadTrafficModelTest >> assertPeopleCommuteOverADayWith: aControlSelector [
+
+	| simulation people |
+	model := RTRoadTrafficModel new.
+	simulation := CMSimulation for: model.
+	simulation
+		randomSeed: 42;
+		activeInitSelector: #initTown;
+		activeControlSelector: aControlSelector;
+		initializeSimulation.
+	people := model @@ RTPerson.
+
+	60 timesRepeat: [ simulation runStep ].
+	self assert:
+		(people count: [ :person | person cell = person workplace ])
+		> (people size / 2).
+
+	40 timesRepeat: [ simulation runStep ].
+	self assert: (people count: [ :person | person cell = person home ])
+		> (people size / 2)
+]
+
+{ #category : 'private' }
 RTRoadTrafficModelTest >> initializeWith: anInitSelector [
 
 	model := RTRoadTrafficModel new.
@@ -112,24 +135,13 @@ RTRoadTrafficModelTest >> testOneWayRoadGoesFromItsFirstPlotToItsSecond [
 { #category : 'tests' }
 RTRoadTrafficModelTest >> testPeopleGoToWorkAndComeBackHomeOverADay [
 
-	| simulation people |
-	model := RTRoadTrafficModel new.
-	simulation := CMSimulation for: model.
-	simulation
-		randomSeed: 42;
-		activeInitSelector: #initTown;
-		activeControlSelector: #stepWithMoveTowards;
-		initializeSimulation.
-	people := model @@ RTPerson.
+	self assertPeopleCommuteOverADayWith: #stepWithMoveTowards
+]
 
-	60 timesRepeat: [ simulation runStep ].
-	self assert:
-		(people count: [ :person | person cell = person workplace ])
-		> (people size / 2).
+{ #category : 'tests' }
+RTRoadTrafficModelTest >> testPeopleGoToWorkAndComeBackHomeOverADayAlongTheLines [
 
-	40 timesRepeat: [ simulation runStep ].
-	self assert: (people count: [ :person | person cell = person home ])
-		> (people size / 2)
+	self assertPeopleCommuteOverADayWith: #stepAlongTheLine
 ]
 
 { #category : 'tests' }

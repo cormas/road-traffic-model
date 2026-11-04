@@ -19,13 +19,14 @@ I am a person who lives in one place in the town, works in another, and walks be
 - `home` answers the plot where I live.
 - `workplace` answers the plot where I work.
 - `destination` answers where I should be going now.
-- `walk` takes my walk for one step.
+- `walkWithMoveTowards` takes my walk for one step, letting Cormas find the cells.
+- `walkAlongTheLine` takes my walk for one step, through the cells of the road's line.
 
 ```
 person := model newEntity: RTPerson locatedAt: homePlot.
 model newEntity: RTHomeLink from: person to: homePlot.
 model newEntity: RTWorkLink from: person to: workPlot.
-person walk
+person walkAlongTheLine
 ```
 
 ## Internal Representation
@@ -113,25 +114,34 @@ RTPerson >> speed: aNumber [
 ]
 
 { #category : 'control' }
-RTPerson >> walk [
+RTPerson >> walk: aMoveOneCellBlock [
 	"Wear slows me down: progress grows by less on a worn road, and each whole unit of progress is one cell."
 
 	self isOnRoad ifFalse: [ self enterRoadTowardsDestination ].
 	self isOnRoad ifFalse: [ ^ self ].
 	progress := progress + (speed / road wear).
 	[ self isOnRoad and: [ progress >= 1 ] ] whileTrue: [
-			self walkOneCell.
-			progress := progress - 1 ].
+			aMoveOneCellBlock value.
+			progress := progress - 1.
+			self cell = roadEnd ifTrue: [
+					road := nil.
+					self enterRoadTowardsDestination ] ].
 	self isOnRoad ifFalse: [ progress := 0 ]
 ]
 
 { #category : 'control' }
-RTPerson >> walkOneCell [
+RTPerson >> walkAlongTheLine [
+	"The road tells me the cells that its drawn line crosses, so I stay on it."
 
-	self moveTowards: roadEnd.
-	self cell = roadEnd ifTrue: [
-			road := nil.
-			self enterRoadTowardsDestination ]
+	self walk: [
+		self moveTo: ((road cellsTowards: roadEnd) after: self cell) ]
+]
+
+{ #category : 'control' }
+RTPerson >> walkWithMoveTowards [
+	"Cormas finds the cells to walk through. It takes the diagonal part of the way first, so on a sloped road I leave the drawn line, and return to it at the far end."
+
+	self walk: [ self moveTowards: roadEnd ]
 ]
 
 { #category : 'accessing' }

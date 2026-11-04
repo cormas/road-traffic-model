@@ -6,6 +6,7 @@ I am a town where people commute along a network of roads. My story comes from t
 - Create the town: a grid of plots and a network of roads drawn by hand in a table.
 - Know which plots are residential and which are industrial.
 - Create the people, each with a home and a workplace chosen at random.
+- Keep time: a Cormas step is a substep of a day, and `stepOfDay` tells which one.
 
 ## Collaborators:
 
@@ -18,16 +19,21 @@ I am a town where people commute along a network of roads. My story comes from t
 
 - `initTown` creates the town with two-way roads.
 - `initTownWithOneWays` creates the same town and applies the one-way marks of the table.
+- `stepWithMoveTowards` and `stepAlongTheLine` run one step, and differ only in how people walk along a road.
 - `residentialPlots` and `industrialPlots` answer the places where people live and work.
+- `stepOfDay` answers the step of the current day.
 - `numberOfPeople` is a parameter.
 
 Run me through a simulation, as any other Cormas model:
 
 ```
 model := RTRoadTrafficModel new.
-(CMSimulation for: model)
+simulation := CMSimulation for: model.
+simulation
 	activeInitSelector: #initTown;
+	activeControlSelector: #stepAlongTheLine;
 	initializeSimulation.
+simulation runStep.
 model @@ RTPerson
 ```
 
@@ -194,6 +200,13 @@ RTRoadTrafficModel >> roadTable [
 	"West"
 ]
 
+{ #category : 'control' }
+RTRoadTrafficModel >> stepAlongTheLine [
+
+	<control>
+	self @@ RTPerson do: [ :person | person walkAlongTheLine ]
+]
+
 { #category : 'time' }
 RTRoadTrafficModel >> stepOfDay [
 	"A Cormas step is a substep of my day. The current time step grows for ever, so the step of the day, from 1 to stepsPerDay, comes from it. Months or years would work the same way."
@@ -205,7 +218,7 @@ RTRoadTrafficModel >> stepOfDay [
 RTRoadTrafficModel >> stepWithMoveTowards [
 
 	<control>
-	self @@ RTPerson do: [ :person | person walk ]
+	self @@ RTPerson do: [ :person | person walkWithMoveTowards ]
 ]
 
 { #category : 'time' }
