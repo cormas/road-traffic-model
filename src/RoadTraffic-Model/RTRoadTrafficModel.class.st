@@ -7,6 +7,7 @@ I am a town where people commute along a network of roads. My story comes from t
 - Know which plots are residential and which are industrial.
 - Create the people, each with a home and a workplace chosen at random.
 - Keep time: a Cormas step is a substep of a day, and `stepOfDay` tells which one.
+- Repair the most worn roads once a day.
 
 ## Collaborators:
 
@@ -20,9 +21,10 @@ I am a town where people commute along a network of roads. My story comes from t
 - `initTown` creates the town with two-way roads.
 - `initTownWithOneWays` creates the same town and applies the one-way marks of the table.
 - `stepWithMoveTowards` and `stepAlongTheLine` run one step, and differ only in how people walk along a road.
+- `dayStep` holds what happens once a day. Both steps send it at the start of each day.
 - `residentialPlots` and `industrialPlots` answer the places where people live and work.
 - `stepOfDay` answers the step of the current day.
-- `numberOfPeople` is a parameter.
+- `numberOfPeople` and `repairsPerDay` are parameters.
 
 Run me through a simulation, as any other Cormas model:
 
@@ -40,13 +42,15 @@ model @@ RTPerson
 ## Internal Representation
 
 - `numberOfPeople`: an integer.
+- `repairsPerDay`: an integer.
 
 "
 Class {
 	#name : 'RTRoadTrafficModel',
 	#superclass : 'CMModel',
 	#instVars : [
-		'numberOfPeople'
+		'numberOfPeople',
+		'repairsPerDay'
 	],
 	#category : 'RoadTraffic-Model',
 	#package : 'RoadTraffic-Model'
@@ -101,6 +105,14 @@ RTRoadTrafficModel >> createTown [
 	self createPeople
 ]
 
+{ #category : 'control' }
+RTRoadTrafficModel >> dayStep [
+	"What happens once a day, as opposed to at every step. The council repairs the most worn roads."
+
+	((self @@ RTRoad sorted: [ :road :other | road wear > other wear ])
+		 first: self repairsPerDay) do: [ :road | road repair ]
+]
+
 { #category : 'map' }
 RTRoadTrafficModel >> industrialPlaces [
 	"The plots where people work, as row and column."
@@ -127,6 +139,12 @@ RTRoadTrafficModel >> initTownWithOneWays [
 	<init>
 	self createTown.
 	self makeMarkedRoadsOneWay
+]
+
+{ #category : 'time' }
+RTRoadTrafficModel >> isStartOfDay [
+
+	^ self stepOfDay = 1
 ]
 
 { #category : 'init' }
@@ -158,6 +176,19 @@ RTRoadTrafficModel >> numberOfPeople [
 RTRoadTrafficModel >> numberOfPeople: aNumber [
 
 	numberOfPeople := aNumber
+]
+
+{ #category : 'parameters' }
+RTRoadTrafficModel >> repairsPerDay [
+
+	<parameterIntegerMin: 0 max: 43 default: 5>
+	^ repairsPerDay
+]
+
+{ #category : 'parameters' }
+RTRoadTrafficModel >> repairsPerDay: aNumber [
+
+	repairsPerDay := aNumber
 ]
 
 { #category : 'map' }
@@ -204,6 +235,7 @@ RTRoadTrafficModel >> roadTable [
 RTRoadTrafficModel >> stepAlongTheLine [
 
 	<control>
+	self isStartOfDay ifTrue: [ self dayStep ].
 	self @@ RTPerson do: [ :person | person walkAlongTheLine ]
 ]
 
@@ -218,6 +250,7 @@ RTRoadTrafficModel >> stepOfDay [
 RTRoadTrafficModel >> stepWithMoveTowards [
 
 	<control>
+	self isStartOfDay ifTrue: [ self dayStep ].
 	self @@ RTPerson do: [ :person | person walkWithMoveTowards ]
 ]
 
