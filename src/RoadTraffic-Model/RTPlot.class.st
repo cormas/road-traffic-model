@@ -99,10 +99,11 @@ RTPlot >> isResidential [
 
 { #category : 'pov' }
 RTPlot >> kindColor [
+	"Deep colors on a paper-colored town: warm where people live and cool where they work. People use lighter shades of the same colors, to stand out on these plots."
 
-	self isResidential ifTrue: [ ^ CMColor orange ].
-	self isIndustrial ifTrue: [ ^ CMColor blue ].
-	^ CMColor paleTan
+	self isResidential ifTrue: [ ^ Color fromHexString: 'C8741A' ].
+	self isIndustrial ifTrue: [ ^ Color fromHexString: '1034A6' ].
+	^ Color fromHexString: 'F3EFE6'
 ]
 
 { #category : 'pov' }

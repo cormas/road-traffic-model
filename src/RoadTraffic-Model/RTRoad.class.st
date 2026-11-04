@@ -130,7 +130,9 @@ RTRoad >> length [
 RTRoad >> povTraffic [
 
 	<pov>
-	^ CMPointOfView size: self trafficSize
+	^ CMPointOfView
+		  color: (Color fromHexString: '4A5568')
+		  size: self trafficSize
 ]
 
 { #category : 'pov' }

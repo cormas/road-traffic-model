@@ -49,6 +49,13 @@ RTRoadTest >> setUp [
 		        to: (model cellAt: 3 at: 6)
 ]
 
+{ #category : 'running' }
+RTRoadTest >> tearDown [
+
+	RTRoad resetClassSideParameters.
+	super tearDown
+]
+
 { #category : 'tests' }
 RTRoadTest >> testCostIsLengthTimesWear [
 

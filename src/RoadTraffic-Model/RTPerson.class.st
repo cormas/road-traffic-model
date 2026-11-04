@@ -54,11 +54,17 @@ Class {
 }
 
 { #category : 'pov' }
-RTPerson >> activityColor [
+RTPerson class >> homeColor [
+	"A light shade of the color of residential plots, far from the red of worn roads. The link to my home uses it too."
 
-	self isAtHome ifTrue: [ ^ CMColor brown ].
-	self isAtWork ifTrue: [ ^ CMColor gold ].
-	^ CMColor black
+	^ Color fromHexString: 'FFB000'
+]
+
+{ #category : 'pov' }
+RTPerson class >> workColor [
+	"A light shade of the color of industrial plots. The link to my workplace uses it too."
+
+	^ Color fromHexString: '3AA0F2'
 ]
 
 { #category : 'accessing' }
@@ -70,6 +76,14 @@ RTPerson >> destination [
 		   and: leaveWorkStep)
 		  ifTrue: [ self workplace ]
 		  ifFalse: [ self home ]
+]
+
+{ #category : 'pov' }
+RTPerson >> destinationColor [
+
+	^ self destination = self workplace
+		  ifTrue: [ self class workColor ]
+		  ifFalse: [ self class homeColor ]
 ]
 
 { #category : 'control' }
@@ -131,7 +145,7 @@ RTPerson >> leaveWorkStep: aNumber [
 RTPerson >> pov [
 
 	<pov>
-	^ CMPointOfView color: self activityColor size: 0.8
+	^ CMPointOfView color: self destinationColor size: 0.8
 ]
 
 { #category : 'accessing' }

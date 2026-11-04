@@ -30,5 +30,5 @@ Class {
 RTWorkLink >> pov [
 
 	<pov>
-	^ CMPointOfView color: CMColor blue size: 0.1
+	^ CMPointOfView color: RTPerson workColor size: 0.1
 ]

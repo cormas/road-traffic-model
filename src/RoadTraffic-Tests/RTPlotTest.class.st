@@ -57,6 +57,13 @@ RTPlotTest >> setUp [
 	end := model cellAt: 1 at: 6
 ]
 
+{ #category : 'running' }
+RTPlotTest >> tearDown [
+
+	RTRoad resetClassSideParameters.
+	super tearDown
+]
+
 { #category : 'tests' }
 RTPlotTest >> testAnswersTheFirstRoadOfAWayOfSeveralRoads [
 

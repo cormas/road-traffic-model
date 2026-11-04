@@ -90,7 +90,7 @@ RTRoadTrafficModel >> createRoads [
 				newEntity: RTRoad
 				from: (self cellAt: row first at: row second)
 				to: (self cellAt: row third at: row fourth) ].
-	RTRoad activePovSelector: #povWear
+	RTRoad activePovSelector: #povWearAndTraffic
 ]
 
 { #category : 'init' }
@@ -169,14 +169,14 @@ RTRoadTrafficModel >> markPlaces [
 { #category : 'probes' }
 RTRoadTrafficModel >> maxWear [
 
-	<probeNamed: 'Max wear' color: 'D0021B'>
+	<probeNamed: 'Max wear' color: 'B90E0A'>
 	^ (self @@ RTRoad collect: [ :road | road wear ]) max
 ]
 
 { #category : 'probes' }
 RTRoadTrafficModel >> meanWear [
 
-	<probeNamed: 'Mean wear' color: 'F5A623'>
+	<probeNamed: 'Mean wear' color: '5C612B'>
 	^ (self @@ RTRoad inject: 0 into: [ :sum :road | sum + road wear ])
 	  / (self @@ RTRoad) size
 ]
@@ -197,21 +197,21 @@ RTRoadTrafficModel >> numberOfPeople: aNumber [
 { #category : 'probes' }
 RTRoadTrafficModel >> peopleAtHome [
 
-	<probeNamed: 'People at home' color: '8B5A2B'>
+	<probeNamed: 'People at home' color: 'FFB000'>
 	^ self @@ RTPerson count: [ :person | person isAtHome ]
 ]
 
 { #category : 'probes' }
 RTRoadTrafficModel >> peopleAtWork [
 
-	<probeNamed: 'People at work' color: '2F6FDE'>
+	<probeNamed: 'People at work' color: '3AA0F2'>
 	^ self @@ RTPerson count: [ :person | person isAtWork ]
 ]
 
 { #category : 'probes' }
 RTRoadTrafficModel >> peopleOnTheRoad [
 
-	<probeNamed: 'People on the road' color: '000000'>
+	<probeNamed: 'People on the road' color: '4A5568'>
 	^ self @@ RTPerson count: [ :person | person isOnRoad ]
 ]
 

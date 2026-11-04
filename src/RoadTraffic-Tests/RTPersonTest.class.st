@@ -93,6 +93,13 @@ RTPersonTest >> setUp [
 		leaveWorkStep: 60
 ]
 
+{ #category : 'running' }
+RTPersonTest >> tearDown [
+
+	RTRoad resetClassSideParameters.
+	super tearDown
+]
+
 { #category : 'tests' }
 RTPersonTest >> testContinuesThroughAJunctionAndStaysAtWork [
 

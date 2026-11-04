@@ -30,5 +30,5 @@ Class {
 RTHomeLink >> pov [
 
 	<pov>
-	^ CMPointOfView color: CMColor orange size: 0.1
+	^ CMPointOfView color: RTPerson homeColor size: 0.1
 ]

@@ -98,6 +98,13 @@ RTRepairTest >> setUp [
 	worn recordUse
 ]
 
+{ #category : 'running' }
+RTRepairTest >> tearDown [
+
+	RTRoad resetClassSideParameters.
+	super tearDown
+]
+
 { #category : 'tests' }
 RTRepairTest >> testDayStepRepairsTheMostWornRoad [
 
