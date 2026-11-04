@@ -1,9 +1,9 @@
 "
-I test how a road measures its length, wears out and gets repaired.
+I test how a road wears out and gets repaired.
 
 ## Responsibility:
 
-- Check the length, wear, uses and cost of a road.
+- Check the wear, uses and cost of a road.
 - Check what a use and a repair do to a road.
 
 ## Collaborators:
@@ -70,13 +70,6 @@ RTRoadTest >> testEachUseWearsTheRoad [
 ]
 
 { #category : 'tests' }
-RTRoadTest >> testLengthIsTheNumberOfStepsAlongTheRoad [
-
-	self assert: road length equals: 5.
-	self assert: road length equals: (road from wayTo: road to) size
-]
-
-{ #category : 'tests' }
 RTRoadTest >> testNewRoadIsUnworn [
 
 	self assert: road wear equals: 1.
@@ -93,26 +86,4 @@ RTRoadTest >> testRepairRemovesWearAndKeepsUses [
 
 	self assert: road wear equals: 1.
 	self assert: road uses equals: 1
-]
-
-{ #category : 'tests' }
-RTRoadTest >> testSimulationSetsTheDefaultWearPerUse [
-
-	RTRoad wearPerUse: 0.5.
-
-	(CMSimulation for: RTRoadTrafficModel new)
-		activeInitSelector: #initTown;
-		initializeSimulation.
-
-	self assert: RTRoad wearPerUse equals: 0.02
-]
-
-{ #category : 'tests' }
-RTRoadTest >> testWearPerUseIsAParameter [
-
-	RTRoad wearPerUse: 0.5.
-
-	road recordUse.
-
-	self assert: road wear equals: 1.5
 ]
