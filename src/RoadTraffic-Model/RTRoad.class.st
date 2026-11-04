@@ -53,6 +53,16 @@ Class {
 	#package : 'RoadTraffic-Model'
 }
 
+{ #category : 'examples' }
+RTRoad class >> exampleWornRoad [
+
+	<sampleInstance>
+	| road |
+	road := (RTRoadTrafficModel exampleTown @@ self) first.
+	road recordUse.
+	^ road
+]
+
 { #category : 'parameters' }
 RTRoad class >> wearPerUse [
 

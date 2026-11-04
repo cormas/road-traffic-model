@@ -26,6 +26,13 @@ Class {
 	#package : 'RoadTraffic-Model'
 }
 
+{ #category : 'examples' }
+RTWorkLink class >> exampleWorkLink [
+
+	<sampleInstance>
+	^ (RTRoadTrafficModel exampleTown @@ self) first
+]
+
 { #category : 'pov' }
 RTWorkLink >> pov [
 

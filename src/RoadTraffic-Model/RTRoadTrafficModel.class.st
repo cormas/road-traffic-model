@@ -1,5 +1,5 @@
 "
-I am a town where people commute along a network of roads. My story comes from the Road Traffic tutorial of GAMA, adapted to the discrete grid of Cormas.
+I am a town where people commute along a network of roads. Roads wear out with use, which slows people down and pushes traffic onto other routes, and a council repairs the most worn roads each day. My story comes from the Road Traffic tutorial of GAMA (https://gama-platform.org/wiki/RoadTrafficModel), adapted to the discrete grid of Cormas.
 
 ## Responsibility:
 
@@ -20,13 +20,14 @@ I am a town where people commute along a network of roads. My story comes from t
 
 - `initTown` creates the town with two-way roads.
 - `initTownWithOneWays` creates the same town and applies the one-way marks of the table.
-- `stepWithMoveTowards` and `stepAlongTheLine` run one step, and differ only in how people walk along a road.
+- `stepAlongTheLine` and `stepWithMoveTowards` run one step, and differ only in how people walk along a road.
 - `dayStep` holds what happens once a day. Both steps send it at the start of each day.
 - `residentialPlots` and `industrialPlots` answer the places where people live and work.
 - `stepOfDay` answers the step of the current day.
-- `numberOfPeople` and `repairsPerDay` are parameters.
+- `numberOfPeople` and `repairsPerDay` are parameters, and so is `wearPerUse` on `RTRoad`.
+- `meanWear`, `maxWear`, `peopleAtHome`, `peopleAtWork` and `peopleOnTheRoad` are the charts.
 
-Run me through a simulation, as any other Cormas model:
+Open me in a simulation window with `RTRoadTrafficModel scriptOpenSimulation`, or run me from code:
 
 ```
 model := RTRoadTrafficModel new.
@@ -36,13 +37,17 @@ simulation
 	activeControlSelector: #stepAlongTheLine;
 	initializeSimulation.
 simulation runStep.
-model @@ RTPerson
+model peopleOnTheRoad
 ```
 
 ## Internal Representation
 
 - `numberOfPeople`: an integer.
 - `repairsPerDay`: an integer.
+
+### Implementation Points
+
+Many models work in days, months or years made of smaller steps, and Cormas runs one step at a time. So `stepOfDay` derives the day from the current time step, and each control method sends `dayStep` when `isStartOfDay` is true. The view and charts still update at every step, so people are seen walking.
 
 "
 Class {
@@ -57,9 +62,37 @@ Class {
 }
 
 { #category : 'accessing' }
+RTRoadTrafficModel class >> aboutThisModel [
+
+	^ 'People commute between home and work along a network of roads drawn on a 50x50 grid. Each road is a link between two plots. Roads wear out with use, which slows people down and pushes traffic onto other routes, and the council repairs the most worn roads each day. A day has 100 steps. Adapted to the grid of Cormas from the Road Traffic tutorial of GAMA.'
+]
+
+{ #category : 'examples' }
+RTRoadTrafficModel class >> exampleTown [
+
+	<sampleInstance>
+	| model |
+	model := self new.
+	(CMSimulation for: model)
+		activeInitSelector: #initTown;
+		activeControlSelector: #stepAlongTheLine;
+		initializeSimulation.
+	^ model
+]
+
+{ #category : 'accessing' }
 RTRoadTrafficModel class >> modelName [
 
 	^ 'Road Traffic'
+]
+
+{ #category : 'examples' }
+RTRoadTrafficModel class >> scriptOpenSimulation [
+
+	<script>
+	^ CMSimulationApplication new
+		  cormasModel: self new;
+		  run
 ]
 
 { #category : 'init' }

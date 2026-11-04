@@ -39,6 +39,13 @@ Class {
 	#package : 'RoadTraffic-Model'
 }
 
+{ #category : 'examples' }
+RTPlot class >> exampleResidentialPlot [
+
+	<sampleInstance>
+	^ RTRoadTrafficModel exampleTown residentialPlots first
+]
+
 { #category : 'accessing' }
 RTPlot >> beIndustrial [
 

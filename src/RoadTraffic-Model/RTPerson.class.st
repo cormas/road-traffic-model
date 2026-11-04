@@ -6,6 +6,7 @@ I am a person who lives in one place in the town, works in another, and walks be
 - Know my home and my workplace, through the links that connect me to them.
 - Know where to go, which only depends on the time of day.
 - Walk along one road at a time, and choose the next road at each junction.
+- Show where I am going: light amber towards home and light blue towards work.
 
 ## Collaborators:
 
@@ -19,8 +20,9 @@ I am a person who lives in one place in the town, works in another, and walks be
 - `home` answers the plot where I live.
 - `workplace` answers the plot where I work.
 - `destination` answers where I should be going now.
-- `walkWithMoveTowards` takes my walk for one step, letting Cormas find the cells.
 - `walkAlongTheLine` takes my walk for one step, through the cells of the road's line.
+- `walkWithMoveTowards` takes my walk for one step, letting Cormas find the cells.
+- `isAtHome`, `isAtWork` and `isOnRoad` tell what I am doing.
 
 ```
 person := model newEntity: RTPerson locatedAt: homePlot.
@@ -52,6 +54,13 @@ Class {
 	#category : 'RoadTraffic-Model',
 	#package : 'RoadTraffic-Model'
 }
+
+{ #category : 'examples' }
+RTPerson class >> examplePerson [
+
+	<sampleInstance>
+	^ (RTRoadTrafficModel exampleTown @@ self) first
+]
 
 { #category : 'pov' }
 RTPerson class >> homeColor [
