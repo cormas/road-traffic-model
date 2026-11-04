@@ -82,6 +82,22 @@ RTRoadTrafficModelTest >> testEveryoneLivesOnAResidentialPlotAndWorksOnAnIndustr
 ]
 
 { #category : 'tests' }
+RTRoadTrafficModelTest >> testFollowingTheCheapestRoadsLeadsToWork [
+
+	self initializeWith: #initTownWithOneWays.
+
+	self assert: (model @@ RTPerson) isNotEmpty.
+	model @@ RTPerson do: [ :person |
+			| plot steps |
+			plot := person home.
+			steps := 0.
+			[ plot = person workplace ] whileFalse: [
+					plot := (plot cheapestRoadTo: person workplace) otherEndOf: plot.
+					steps := steps + 1.
+					self assert: steps < (model @@ RTRoad) size ] ]
+]
+
+{ #category : 'tests' }
 RTRoadTrafficModelTest >> testOneWayRoadGoesFromItsFirstPlotToItsSecond [
 
 	| first second |
