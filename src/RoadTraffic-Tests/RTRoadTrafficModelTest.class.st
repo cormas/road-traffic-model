@@ -110,6 +110,29 @@ RTRoadTrafficModelTest >> testOneWayRoadGoesFromItsFirstPlotToItsSecond [
 ]
 
 { #category : 'tests' }
+RTRoadTrafficModelTest >> testPeopleGoToWorkAndComeBackHomeOverADay [
+
+	| simulation people |
+	model := RTRoadTrafficModel new.
+	simulation := CMSimulation for: model.
+	simulation
+		randomSeed: 42;
+		activeInitSelector: #initTown;
+		activeControlSelector: #stepWithMoveTowards;
+		initializeSimulation.
+	people := model @@ RTPerson.
+
+	60 timesRepeat: [ simulation runStep ].
+	self assert:
+		(people count: [ :person | person cell = person workplace ])
+		> (people size / 2).
+
+	40 timesRepeat: [ simulation runStep ].
+	self assert: (people count: [ :person | person cell = person home ])
+		> (people size / 2)
+]
+
+{ #category : 'tests' }
 RTRoadTrafficModelTest >> testPeopleStartAtHome [
 
 	self initializeWith: #initTown.
@@ -126,4 +149,17 @@ RTRoadTrafficModelTest >> testRoadsOfTheTownAreTwoWay [
 
 	self assert:
 		(model @@ RTRoad noneSatisfy: [ :road | road isDirected ])
+]
+
+{ #category : 'tests' }
+RTRoadTrafficModelTest >> testStepOfDayRepeatsEveryDay [
+
+	self initializeWith: #initTown.
+
+	model simulationContext currentTimeStep: 1.
+	self assert: model stepOfDay equals: 1.
+	model simulationContext currentTimeStep: 100.
+	self assert: model stepOfDay equals: 100.
+	model simulationContext currentTimeStep: 101.
+	self assert: model stepOfDay equals: 1
 ]

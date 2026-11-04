@@ -193,3 +193,23 @@ RTRoadTrafficModel >> roadTable [
 	"South"
 	"West"
 ]
+
+{ #category : 'time' }
+RTRoadTrafficModel >> stepOfDay [
+	"A Cormas step is a substep of my day. The current time step grows for ever, so the step of the day, from 1 to stepsPerDay, comes from it. Months or years would work the same way."
+
+	^ self currentTimeStep - 1 \\ self stepsPerDay + 1
+]
+
+{ #category : 'control' }
+RTRoadTrafficModel >> stepWithMoveTowards [
+
+	<control>
+	self @@ RTPerson do: [ :person | person walk ]
+]
+
+{ #category : 'time' }
+RTRoadTrafficModel >> stepsPerDay [
+
+	^ 100
+]
