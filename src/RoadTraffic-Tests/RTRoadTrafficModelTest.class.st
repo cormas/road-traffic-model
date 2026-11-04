@@ -71,6 +71,17 @@ RTRoadTrafficModelTest >> testEveryoneCanGetToWorkAndBackWithOneWays [
 ]
 
 { #category : 'tests' }
+RTRoadTrafficModelTest >> testEveryoneLivesOnAResidentialPlotAndWorksOnAnIndustrialOne [
+
+	self initializeWith: #initTown.
+
+	self assert: (model @@ RTPerson) isNotEmpty.
+	model @@ RTPerson do: [ :person |
+			self assert: person home isResidential.
+			self assert: person workplace isIndustrial ]
+]
+
+{ #category : 'tests' }
 RTRoadTrafficModelTest >> testOneWayRoadGoesFromItsFirstPlotToItsSecond [
 
 	| first second |
@@ -80,6 +91,16 @@ RTRoadTrafficModelTest >> testOneWayRoadGoesFromItsFirstPlotToItsSecond [
 
 	self assert: ((first nextEntitiesLinkedBy: RTRoad) includes: second).
 	self deny: ((second nextEntitiesLinkedBy: RTRoad) includes: first)
+]
+
+{ #category : 'tests' }
+RTRoadTrafficModelTest >> testPeopleStartAtHome [
+
+	self initializeWith: #initTown.
+
+	self assert: (model @@ RTPerson) isNotEmpty.
+	model @@ RTPerson do: [ :person |
+		self assert: person cell equals: person home ]
 ]
 
 { #category : 'tests' }

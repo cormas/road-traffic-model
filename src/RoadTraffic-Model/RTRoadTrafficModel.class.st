@@ -5,17 +5,21 @@ I am a town where people commute along a network of roads. My story comes from t
 
 - Create the town: a grid of plots and a network of roads drawn by hand in a table.
 - Know which plots are residential and which are industrial.
+- Create the people, each with a home and a workplace chosen at random.
 
 ## Collaborators:
 
 - `RTPlot`: the cells of my grid.
 - `RTRoad`: the links between plots that make up the network.
+- `RTPerson`: the people of the town.
+- `RTHomeLink` and `RTWorkLink`: connect people to their places. I hide these lines when I create the town, and selecting their point of view shows them.
 
 ## Public API and Key Messages
 
 - `initTown` creates the town with two-way roads.
 - `initTownWithOneWays` creates the same town and applies the one-way marks of the table.
 - `residentialPlots` and `industrialPlots` answer the places where people live and work.
+- `numberOfPeople` is a parameter.
 
 Run me through a simulation, as any other Cormas model:
 
@@ -24,13 +28,20 @@ model := RTRoadTrafficModel new.
 (CMSimulation for: model)
 	activeInitSelector: #initTown;
 	initializeSimulation.
-model @@ RTRoad
+model @@ RTPerson
 ```
+
+## Internal Representation
+
+- `numberOfPeople`: an integer.
 
 "
 Class {
 	#name : 'RTRoadTrafficModel',
 	#superclass : 'CMModel',
+	#instVars : [
+		'numberOfPeople'
+	],
 	#category : 'RoadTraffic-Model',
 	#package : 'RoadTraffic-Model'
 }
@@ -42,6 +53,36 @@ RTRoadTrafficModel class >> modelName [
 ]
 
 { #category : 'init' }
+RTRoadTrafficModel >> createPeople [
+	"Everyone starts at home. The lines from people to their places are hidden, because so many of them would hide the roads."
+
+	| homes workplaces |
+	homes := self residentialPlots.
+	workplaces := self industrialPlots.
+	self numberOfPeople timesRepeat: [
+			| home person |
+			home := self selectRandomlyFrom: homes.
+			person := self newEntity: RTPerson locatedAt: home.
+			self newEntity: RTHomeLink from: person to: home.
+			self
+				newEntity: RTWorkLink
+				from: person
+				to: (self selectRandomlyFrom: workplaces) ].
+	RTHomeLink activePovSelector: #povInvisible.
+	RTWorkLink activePovSelector: #povInvisible
+]
+
+{ #category : 'init' }
+RTRoadTrafficModel >> createRoads [
+
+	self roadTable do: [ :row |
+			self
+				newEntity: RTRoad
+				from: (self cellAt: row first at: row second)
+				to: (self cellAt: row third at: row fourth) ]
+]
+
+{ #category : 'init' }
 RTRoadTrafficModel >> createTown [
 
 	self
@@ -49,17 +90,9 @@ RTRoadTrafficModel >> createTown [
 		numberOfColumns: 50
 		neighbourhood: 8
 		closed: true.
-
-	self roadTable do: [ :row |
-			self
-				newEntity: RTRoad
-				from: (self cellAt: row first at: row second)
-				to: (self cellAt: row third at: row fourth) ].
-
-	self residentialPlaces do: [ :place |
-		(self cellAt: place first at: place second) beResidential ].
-	self industrialPlaces do: [ :place |
-		(self cellAt: place first at: place second) beIndustrial ]
+	self createRoads.
+	self markPlaces.
+	self createPeople
 ]
 
 { #category : 'map' }
@@ -97,6 +130,28 @@ RTRoadTrafficModel >> makeMarkedRoadsOneWay [
 	self @@ RTRoad
 		with: self roadTable
 		do: [ :road :row | row size = 5 ifTrue: [ road beOneWay ] ]
+]
+
+{ #category : 'init' }
+RTRoadTrafficModel >> markPlaces [
+
+	self residentialPlaces do: [ :place |
+		(self cellAt: place first at: place second) beResidential ].
+	self industrialPlaces do: [ :place |
+		(self cellAt: place first at: place second) beIndustrial ]
+]
+
+{ #category : 'parameters' }
+RTRoadTrafficModel >> numberOfPeople [
+
+	<parameterIntegerMin: 1 max: 500 default: 30>
+	^ numberOfPeople
+]
+
+{ #category : 'parameters' }
+RTRoadTrafficModel >> numberOfPeople: aNumber [
+
+	numberOfPeople := aNumber
 ]
 
 { #category : 'map' }
