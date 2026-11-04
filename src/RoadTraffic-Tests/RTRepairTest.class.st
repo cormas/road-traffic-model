@@ -108,6 +108,13 @@ RTRepairTest >> testDayStepRepairsTheMostWornRoad [
 ]
 
 { #category : 'tests' }
+RTRepairTest >> testMeanAndMaxWearOfTheTown [
+
+	self assert: model meanWear equals: 2.
+	self assert: model maxWear equals: 3
+]
+
+{ #category : 'tests' }
 RTRepairTest >> testRepairsKeepTheTownInBetterCondition [
 
 	self assert: (self meanWearAfterFiveDaysWithRepairsPerDay: 5)

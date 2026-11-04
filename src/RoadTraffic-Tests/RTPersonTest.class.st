@@ -145,6 +145,27 @@ RTPersonTest >> testFasterPersonWalksMoreCells [
 ]
 
 { #category : 'tests' }
+RTPersonTest >> testIsAtHomeOnTheRoadOrAtWork [
+
+	self timeStep: 5.
+	person walkWithMoveTowards.
+	self assert: person isAtHome.
+	self deny: person isOnRoad.
+	self deny: person isAtWork.
+
+	self timeStep: 10.
+	person walkWithMoveTowards.
+	self assert: person isOnRoad.
+	self deny: person isAtHome.
+	self deny: person isAtWork.
+
+	self walkTimes: 5.
+	self assert: person isAtWork.
+	self deny: person isOnRoad.
+	self deny: person isAtHome
+]
+
+{ #category : 'tests' }
 RTPersonTest >> testLatePersonFinishesTheRoadThenTurnsBack [
 
 	self timeStep: 10.

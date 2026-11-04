@@ -7,6 +7,7 @@ I am one straight segment of road between two plots. A street that bends is a ch
 - Know whether traffic may only go from my `from` end to my `to` end.
 - Wear out with each use, which makes me more costly to travel, until I am repaired.
 - Know the cells that my straight line crosses.
+- Show my wear as a color and my traffic as a width.
 
 ## Collaborators:
 
@@ -22,6 +23,7 @@ I am one straight segment of road between two plots. A street that bends is a ch
 - `repair` sets `wear` back to 1.
 - `uses` counts all uses, and repairs do not reset it.
 - `beOneWay` makes me one-way, from `from` to `to`. `isOneWay` and `isDirected` tell whether I am.
+- `povWear`, `povTraffic` and `povWearAndTraffic` are my points of view.
 
 ```
 road := model newEntity: RTRoad from: plotA to: plotB.
@@ -125,10 +127,24 @@ RTRoad >> length [
 ]
 
 { #category : 'pov' }
-RTRoad >> pov [
+RTRoad >> povTraffic [
 
 	<pov>
-	^ CMPointOfView size: 0.2
+	^ CMPointOfView size: self trafficSize
+]
+
+{ #category : 'pov' }
+RTRoad >> povWear [
+
+	<pov>
+	^ CMPointOfView color: self wearColor size: 0.2
+]
+
+{ #category : 'pov' }
+RTRoad >> povWearAndTraffic [
+
+	<pov>
+	^ CMPointOfView color: self wearColor size: self trafficSize
 ]
 
 { #category : 'actions' }
@@ -145,6 +161,16 @@ RTRoad >> repair [
 	wear := 1
 ]
 
+{ #category : 'pov' }
+RTRoad >> trafficSize [
+	"Grows with my uses, compared with the busiest road of the town, so main routes stand out at any time."
+
+	| busiest |
+	busiest := (self cormasModel @@ RTRoad collect: [ :road | road uses ])
+		           max.
+	^ 0.1 + (0.6 * self uses / (busiest max: 1))
+]
+
 { #category : 'accessing' }
 RTRoad >> uses [
 
@@ -155,4 +181,11 @@ RTRoad >> uses [
 RTRoad >> wear [
 
 	^ wear
+]
+
+{ #category : 'pov' }
+RTRoad >> wearColor [
+	"Green when unworn, turning red, and fully red from a wear of 2.5."
+
+	^ CMColor red mixed: (self wear - 1 / 1.5 min: 1) with: CMColor green
 ]

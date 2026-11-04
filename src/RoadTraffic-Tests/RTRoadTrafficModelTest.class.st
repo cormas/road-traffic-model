@@ -94,6 +94,27 @@ RTRoadTrafficModelTest >> testEveryoneCanGetToWorkAndBackWithOneWays [
 ]
 
 { #category : 'tests' }
+RTRoadTrafficModelTest >> testEveryoneIsAtHomeOrAtWorkOrOnTheRoadAtAnyTime [
+
+	| simulation |
+	model := RTRoadTrafficModel new.
+	simulation := CMSimulation for: model.
+	simulation
+		randomSeed: 42;
+		activeInitSelector: #initTown;
+		activeControlSelector: #stepAlongTheLine;
+		initializeSimulation.
+
+	self assert: model peopleAtHome equals: (model @@ RTPerson) size.
+	100 timesRepeat: [
+			simulation runStep.
+			self
+				assert:
+				model peopleAtHome + model peopleAtWork + model peopleOnTheRoad
+				equals: (model @@ RTPerson) size ]
+]
+
+{ #category : 'tests' }
 RTRoadTrafficModelTest >> testEveryoneLivesOnAResidentialPlotAndWorksOnAnIndustrialOne [
 
 	self initializeWith: #initTown.

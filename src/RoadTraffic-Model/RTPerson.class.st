@@ -53,6 +53,14 @@ Class {
 	#package : 'RoadTraffic-Model'
 }
 
+{ #category : 'pov' }
+RTPerson >> activityColor [
+
+	self isAtHome ifTrue: [ ^ CMColor brown ].
+	self isAtWork ifTrue: [ ^ CMColor gold ].
+	^ CMColor black
+]
+
 { #category : 'accessing' }
 RTPerson >> destination [
 	"Where I should be going now. It only depends on the time of day, so a person who is late simply turns round at the next junction."
@@ -85,8 +93,20 @@ RTPerson >> initialize [
 	super initialize.
 	leaveHomeStep := self randomIntegerBetween: 10 and: 25.
 	leaveWorkStep := self randomIntegerBetween: 60 and: 80.
-	speed := self randomBetween: 1 and: 2.
+	speed := self randomBetween: 2 and: 3.
 	progress := 0
+]
+
+{ #category : 'testing' }
+RTPerson >> isAtHome [
+
+	^ self isOnRoad not and: [ self cell = self home ]
+]
+
+{ #category : 'testing' }
+RTPerson >> isAtWork [
+
+	^ self isOnRoad not and: [ self cell = self workplace ]
 ]
 
 { #category : 'testing' }
@@ -105,6 +125,13 @@ RTPerson >> leaveHomeStep: aNumber [
 RTPerson >> leaveWorkStep: aNumber [
 
 	leaveWorkStep := aNumber
+]
+
+{ #category : 'pov' }
+RTPerson >> pov [
+
+	<pov>
+	^ CMPointOfView color: self activityColor size: 0.8
 ]
 
 { #category : 'accessing' }
