@@ -175,12 +175,8 @@ RTRoad >> repair [
 
 { #category : 'pov' }
 RTRoad >> trafficSize [
-	"Grows with my uses, compared with the busiest road of the town, so main routes stand out at any time."
 
-	| busiest |
-	busiest := (self cormasModel @@ RTRoad collect: [ :road | road uses ])
-		           max.
-	^ 0.1 + (0.6 * self uses / (busiest max: 1))
+	^ self cormasModel sizeForUses: self uses
 ]
 
 { #category : 'accessing' }

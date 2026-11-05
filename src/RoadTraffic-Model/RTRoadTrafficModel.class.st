@@ -289,6 +289,15 @@ RTRoadTrafficModel >> roadTable [
 	^ self streetTable flatCollect: [ :street | street allButFirst ]
 ]
 
+{ #category : 'pov' }
+RTRoadTrafficModel >> sizeForUses: aNumber [
+	"The width of a road with this many uses, compared with the busiest road of the town, so main routes stand out at any time."
+
+	| busiest |
+	busiest := (self @@ RTRoad collect: [ :road | road uses ]) max.
+	^ 0.1 + (0.6 * aNumber / (busiest max: 1))
+]
+
 { #category : 'control' }
 RTRoadTrafficModel >> stepAlongTheLine [
 

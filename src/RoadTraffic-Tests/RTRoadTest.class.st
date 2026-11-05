@@ -57,6 +57,12 @@ RTRoadTest >> tearDown [
 ]
 
 { #category : 'tests' }
+RTRoadTest >> testAStreetWithNoRoadsHasNoUses [
+
+	self assert: (model newEntity: RTStreet) meanUses equals: 0
+]
+
+{ #category : 'tests' }
 RTRoadTest >> testAStreetWithNoRoadsIsUnworn [
 
 	self assert: (model newEntity: RTStreet) meanWear equals: 1
@@ -80,6 +86,22 @@ RTRoadTest >> testEachUseWearsTheRoad [
 
 	self assert: (road wear closeTo: 1.04).
 	self assert: road uses equals: 2
+]
+
+{ #category : 'tests' }
+RTRoadTest >> testMeanUsesOfAStreetIsTheAverageOfItsRoads [
+
+	| street quiet |
+	quiet := model
+		         newEntity: RTRoad
+		         from: (model cellAt: 7 at: 6)
+		         to: (model cellAt: 9 at: 6).
+	street := model newEntity: RTStreet.
+	street addAll: {
+			road.
+			quiet }.
+	4 timesRepeat: [ road recordUse ].
+	self assert: street meanUses equals: 2
 ]
 
 { #category : 'tests' }
