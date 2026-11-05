@@ -57,6 +57,12 @@ RTRoadTest >> tearDown [
 ]
 
 { #category : 'tests' }
+RTRoadTest >> testAStreetWithNoRoadsIsUnworn [
+
+	self assert: (model newEntity: RTStreet) meanWear equals: 1
+]
+
+{ #category : 'tests' }
 RTRoadTest >> testCostIsLengthTimesWear [
 
 	RTRoad wearPerUse: 0.5.
@@ -77,6 +83,39 @@ RTRoadTest >> testEachUseWearsTheRoad [
 ]
 
 { #category : 'tests' }
+RTRoadTest >> testMeanWearOfAStreetIsTheAverageOfItsRoads [
+
+	| street other |
+	other := model
+		         newEntity: RTRoad
+		         from: (model cellAt: 3 at: 6)
+		         to: (model cellAt: 5 at: 6).
+	street := model newEntity: RTStreet.
+	street addAll: {
+			road.
+			other }.
+	road recordUse.
+	self assert: (street meanWear closeTo: 1.01)
+]
+
+{ #category : 'tests' }
+RTRoadTest >> testMeanWearOfTheTownIsTheAverageOfAllItsRoads [
+
+	| street town other |
+	other := model
+		         newEntity: RTRoad
+		         from: (model cellAt: 3 at: 6)
+		         to: (model cellAt: 5 at: 6).
+	street := model newEntity: RTStreet.
+	street add: road.
+	town := model newEntity: RTTown.
+	town add: street.
+	town add: other.
+	road recordUse.
+	self assert: (town meanWear closeTo: 1.01)
+]
+
+{ #category : 'tests' }
 RTRoadTest >> testNewRoadIsUnworn [
 
 	self assert: road wear equals: 1.
@@ -93,4 +132,20 @@ RTRoadTest >> testRepairRemovesWearAndKeepsUses [
 
 	self assert: road wear equals: 1.
 	self assert: road uses equals: 1
+]
+
+{ #category : 'tests' }
+RTRoadTest >> testWearOfOneStreetDoesNotAffectAnother [
+
+	| worn clean |
+	worn := model newEntity: RTStreet.
+	worn add: road.
+	clean := model newEntity: RTStreet.
+	clean add: (model
+			 newEntity: RTRoad
+			 from: (model cellAt: 3 at: 6)
+			 to: (model cellAt: 5 at: 6)).
+	road recordUse.
+	self assert: worn meanWear > 1.
+	self assert: clean meanWear equals: 1
 ]

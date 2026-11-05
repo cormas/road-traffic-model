@@ -218,8 +218,7 @@ RTRoadTrafficModel >> maxWear [
 RTRoadTrafficModel >> meanWear [
 
 	<probeNamed: 'Mean wear' color: '5C612B'>
-	^ (self @@ RTRoad inject: 0 into: [ :sum :road | sum + road wear ])
-	  / (self @@ RTRoad) size
+	^ self town meanWear
 ]
 
 { #category : 'parameters' }

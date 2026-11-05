@@ -92,6 +92,10 @@ RTRepairTest >> setUp [
 		        newEntity: RTRoad
 		        from: (model cellAt: 5 at: 1)
 		        to: (model cellAt: 5 at: 3).
+	(model newEntity: RTTown) addAll: {
+			clean.
+			worst.
+			worn }.
 	worst
 		recordUse;
 		recordUse.

@@ -16,6 +16,7 @@ I am a street of the town: a few roads that belong together and share a name. Mo
 
 - `name` answers my name.
 - `links` answers my roads, as for any network.
+- `meanWear` and `povWear` come from `RTRoadNetwork`.
 
 ```
 street := model newEntity: RTStreet.
@@ -29,7 +30,7 @@ street add: road
 "
 Class {
 	#name : 'RTStreet',
-	#superclass : 'CMNetwork',
+	#superclass : 'RTRoadNetwork',
 	#instVars : [
 		'name'
 	],

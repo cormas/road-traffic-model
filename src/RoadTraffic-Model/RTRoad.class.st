@@ -53,6 +53,13 @@ Class {
 	#package : 'RoadTraffic-Model'
 }
 
+{ #category : 'pov' }
+RTRoad class >> colorForWear: aNumber [
+	"Green when unworn, turning red, and fully red from a wear of 2.5."
+
+	^ CMColor red mixed: (aNumber - 1 / 1.5 min: 1) with: CMColor green
+]
+
 { #category : 'examples' }
 RTRoad class >> exampleWornRoad [
 
@@ -190,7 +197,6 @@ RTRoad >> wear [
 
 { #category : 'pov' }
 RTRoad >> wearColor [
-	"Green when unworn, turning red, and fully red from a wear of 2.5."
 
-	^ CMColor red mixed: (self wear - 1 / 1.5 min: 1) with: CMColor green
+	^ self class colorForWear: self wear
 ]
