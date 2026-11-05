@@ -38,7 +38,7 @@ Class {
 { #category : 'private' }
 RTPlotTest >> roadFrom: aPlot to: anotherPlot [
 
-	^ model newEntity: RTRoad from: aPlot to: anotherPlot
+	^ model town add: (model newEntity: RTRoad from: aPlot to: anotherPlot)
 ]
 
 { #category : 'running' }
@@ -52,6 +52,7 @@ RTPlotTest >> setUp [
 		numberOfColumns: 10
 		neighbourhood: 8
 		closed: true.
+	model newEntity: RTTown.
 	start := model cellAt: 1 at: 1.
 	middle := model cellAt: 4 at: 3.
 	end := model cellAt: 1 at: 6
@@ -92,6 +93,16 @@ RTPlotTest >> testOneWayRoadIsNotTakenBackwards [
 	self roadFrom: middle to: end.
 
 	self assert: (start cheapestRoadTo: end) equals: firstOfTheLongWay
+]
+
+{ #category : 'tests' }
+RTPlotTest >> testRoadsOutsideTheTownAreNotFollowed [
+
+	| inTown |
+	model newEntity: RTRoad from: start to: end.
+	inTown := self roadFrom: start to: middle.
+	self roadFrom: middle to: end.
+	self assert: (start cheapestRoadTo: end) equals: inTown
 ]
 
 { #category : 'tests' }

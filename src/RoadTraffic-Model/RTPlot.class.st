@@ -58,31 +58,12 @@ RTPlot >> beResidential [
 	kind := #residential
 ]
 
-{ #category : 'routes' }
+{ #category : 'routing' }
 RTPlot >> cheapestRoadTo: aPlot [
-	"Answer the road to take from here on the cheapest route to aPlot, using Dijkstra's algorithm: always continue from the cheapest plot reached so far, until that plot is aPlot. It follows only roads, in the directions they allow, and compares their costs at this moment."
+	"Answer the road to take from here on the cheapest way to aPlot through the town, comparing the costs of the roads at this moment. It is an error if there is no way"
 
-	| costs firstRoads frontier |
-	costs := Dictionary new.
-	firstRoads := Dictionary new.
-	frontier := OrderedCollection with: self.
-	costs at: self put: 0.
-	[ frontier isEmpty ] whileFalse: [
-			| plot |
-			plot := frontier detectMin: [ :each | costs at: each ].
-			frontier remove: plot.
-			plot = aPlot ifTrue: [ ^ firstRoads at: aPlot ].
-			(plot outgoingLinksOfClass: RTRoad) do: [ :road |
-					| next cost |
-					next := road otherEndOf: plot.
-					cost := (costs at: plot) + road cost.
-					cost < (costs at: next ifAbsent: [ Float infinity ]) ifTrue: [
-							(costs includesKey: next) ifFalse: [ frontier add: next ].
-							costs at: next put: cost.
-							firstRoads
-								at: next
-								put: (firstRoads at: plot ifAbsent: [ road ]) ] ] ].
-	self error: 'No route from this plot to the other plot'
+	^ (self wayTo: aPlot in: cormasModel town cost: [ :road | road cost ])
+		  first
 ]
 
 { #category : 'initialization' }

@@ -55,8 +55,7 @@ Class {
 	#superclass : 'CMModel',
 	#instVars : [
 		'numberOfPeople',
-		'repairsPerDay',
-		'town'
+		'repairsPerDay'
 	],
 	#category : 'RoadTraffic-Model',
 	#package : 'RoadTraffic-Model'
@@ -120,6 +119,7 @@ RTRoadTrafficModel >> createPeople [
 RTRoadTrafficModel >> createRoads [
 	"The town holds the streets, and each street holds its roads"
 
+	| town |
 	town := self newEntity: RTTown.
 	self streetTable do: [ :row |
 			| street |
@@ -351,6 +351,7 @@ RTRoadTrafficModel >> streetTable [
 
 { #category : 'accessing' }
 RTRoadTrafficModel >> town [
+	"There is one town, created with the roads"
 
-	^ town
+	^ (self @@ RTTown) first
 ]

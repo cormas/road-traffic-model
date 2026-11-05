@@ -57,7 +57,7 @@ RTPersonTest >> distanceOf: aPlot fromLineBetween: aCell and: anotherCell [
 RTPersonTest >> personOnSlopedRoadFrom: aHome to: aWorkplace [
 
 	| walker |
-	model newEntity: RTRoad from: aHome to: aWorkplace.
+	model town add: (model newEntity: RTRoad from: aHome to: aWorkplace).
 	walker := model newEntity: RTPerson locatedAt: aHome.
 	model newEntity: RTHomeLink from: walker to: aHome.
 	model newEntity: RTWorkLink from: walker to: aWorkplace.
@@ -84,6 +84,7 @@ RTPersonTest >> setUp [
 	workplace := model cellAt: 1 at: 7.
 	firstRoad := model newEntity: RTRoad from: home to: junction.
 	secondRoad := model newEntity: RTRoad from: junction to: workplace.
+	(model newEntity: RTTown) addAll: { firstRoad. secondRoad }.
 	person := model newEntity: RTPerson locatedAt: home.
 	model newEntity: RTHomeLink from: person to: home.
 	model newEntity: RTWorkLink from: person to: workplace.
