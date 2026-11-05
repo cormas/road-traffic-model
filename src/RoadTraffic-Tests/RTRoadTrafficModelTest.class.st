@@ -78,6 +78,22 @@ RTRoadTrafficModelTest >> initializeWith: anInitSelector [
 ]
 
 { #category : 'tests' }
+RTRoadTrafficModelTest >> testAOneWayStreetRunsOneWayFromEndToEnd [
+	"Traffic on a street goes both ways on all of its roads, or one way along all of them"
+
+	| town oneWays |
+	town := RTRoadTrafficModel new.
+	town initTownWithOneWays.
+	oneWays := town @@ RTStreet select: [ :street |
+		           street links anySatisfy: [ :road | road isOneWay ] ].
+	self deny: oneWays isEmpty.
+	oneWays do: [ :street |
+			self assert: (street links allSatisfy: [ :road | road isOneWay ]).
+			self assert: street sources size equals: 1.
+			self assert: street sinks size equals: 1 ]
+]
+
+{ #category : 'tests' }
 RTRoadTrafficModelTest >> testEveryRoadIsInExactlyOneStreet [
 
 	self initializeWith: #initTown.

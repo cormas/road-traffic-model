@@ -13,13 +13,14 @@ I am a town where people commute along a network of roads. Roads wear out with u
 
 - `RTPlot`: the cells of my grid.
 - `RTRoad`: the links between plots that make up the network.
+- `RTStreet` and `RTTown`: the networks that group the roads.
 - `RTPerson`: the people of the town.
 - `RTHomeLink` and `RTWorkLink`: connect people to their places. I hide these lines when I create the town, and selecting their point of view shows them.
 
 ## Public API and Key Messages
 
 - `initTown` creates the town with two-way roads.
-- `initTownWithOneWays` creates the same town and applies the one-way marks of the table.
+- `initTownWithOneWays` creates the same town, with the streets of `oneWayStreetNames` running one way along their whole length.
 - `stepAlongTheLine` and `stepWithMoveTowards` run one step, and differ only in how people walk along a road.
 - `dayStep` holds what happens once a day. Both steps send it at the start of each day.
 - `residentialPlots` and `industrialPlots` answer the places where people live and work.
@@ -125,11 +126,10 @@ RTRoadTrafficModel >> createRoads [
 			| street |
 			street := self newEntity: RTStreet.
 			street name: row first.
-			row allButFirst do: [ :road |
-					street add: (self
-							 newEntity: RTRoad
-							 from: (self cellAt: road first at: road second)
-							 to: (self cellAt: road third at: road fourth)) ].
+			street
+				addChainOf: RTRoad
+				through: (row allButFirst collect: [ :plot |
+						 self cellAt: plot first at: plot second ]).
 			town add: street ].
 	RTRoad activePovSelector: #povWearAndTraffic
 ]
@@ -180,7 +180,7 @@ RTRoadTrafficModel >> initTownWithOneWays [
 
 	<init>
 	self createTown.
-	self makeMarkedRoadsOneWay
+	self makeStreetsOneWay
 ]
 
 { #category : 'time' }
@@ -190,12 +190,11 @@ RTRoadTrafficModel >> isStartOfDay [
 ]
 
 { #category : 'init' }
-RTRoadTrafficModel >> makeMarkedRoadsOneWay [
-	"Roads are created in the order of the table."
+RTRoadTrafficModel >> makeStreetsOneWay [
 
-	self @@ RTRoad
-		with: self roadTable
-		do: [ :road :row | row size = 5 ifTrue: [ road beOneWay ] ]
+	self @@ RTStreet
+		select: [ :street | self oneWayStreetNames includes: street name ]
+		thenDo: [ :street | street links do: [ :road | road beOneWay ] ]
 ]
 
 { #category : 'init' }
@@ -232,6 +231,13 @@ RTRoadTrafficModel >> numberOfPeople [
 RTRoadTrafficModel >> numberOfPeople: aNumber [
 
 	numberOfPeople := aNumber
+]
+
+{ #category : 'map' }
+RTRoadTrafficModel >> oneWayStreetNames [
+	"The streets that run one way, from their first plot to their last, when the town uses one-way roads"
+
+	^ #( 'Market Square' 'Canal Street' 'Bridge Street' 'Cross Lane' )
 ]
 
 { #category : 'probes' }
@@ -282,13 +288,6 @@ RTRoadTrafficModel >> residentialPlots [
 	^ self @@ RTPlot select: [ :plot | plot isResidential ]
 ]
 
-{ #category : 'map' }
-RTRoadTrafficModel >> roadTable [
-	"The roads of all the streets, in the order they are created"
-
-	^ self streetTable flatCollect: [ :street | street allButFirst ]
-]
-
 { #category : 'pov' }
 RTRoadTrafficModel >> sizeForUses: aNumber [
 	"The width of a road with this many uses, compared with the busiest road of the town, so main routes stand out at any time."
@@ -329,32 +328,26 @@ RTRoadTrafficModel >> stepsPerDay [
 
 { #category : 'map' }
 RTRoadTrafficModel >> streetTable [
-	"The streets of the town: a name, then one row per straight road: from row, from column, to row, to column. A street that bends is several rows that share a plot. A last #oneWay makes the road one-way from its first plot to its second, when the town uses one-way roads. Change a row to move a road."
+	"The streets of the town: a name, then the plots it passes through, as row and column, with a straight road between each plot and the next. So a street never branches: it runs from one end to the other, or back to its first plot in a loop. Change a plot to move a road."
 
-	^ #( #( 'Ring Road' #( 18 22 19 30 ) #( 19 30 25 33 )
-	        #( 25 33 31 29 ) #( 31 29 32 21 ) #( 32 21 26 17 )
-	        #( 26 17 18 22 ) )
-	     #( 'Market Square' #( 25 25 18 22 ) #( 25 25 25 33 #oneWay )
-	        #( 25 25 32 21 ) )
-	     #( 'North Road' #( 18 22 11 19 ) #( 11 19 4 22 ) )
-	     #( 'Hill Road' #( 19 30 12 33 ) #( 12 33 5 38 ) #( 5 38 3 46 ) )
-	     #( 'Chapel Lane' #( 11 19 9 26 ) #( 9 26 12 33 #oneWay )
-	        #( 9 26 4 22 ) )
-	     #( 'East Road' #( 25 33 22 41 ) #( 22 41 17 47 ) )
-	     #( 'Canal Street' #( 12 33 15 39 ) #( 15 39 22 41 #oneWay )
-	        #( 15 39 17 47 ) )
-	     #( 'Harbour Road' #( 31 29 33 38 ) #( 33 38 38 45 ) )
-	     #( 'South Road' #( 31 29 39 31 ) #( 39 31 46 27 ) )
-	     #( 'Bridge Street' #( 33 38 39 31 ) #( 41 25 39 31 #oneWay ) )
-	     #( 'Mill Lane' #( 41 25 39 18 ) #( 41 25 46 27 ) )
-	     #( 'West Road' #( 32 21 39 18 ) #( 39 18 46 22 )
-	        #( 39 18 43 10 ) )
-	     #( 'Fort Road' #( 26 17 22 10 ) #( 22 10 18 3 ) )
-	     #( 'Old Road' #( 26 17 30 10 ) #( 30 10 35 4 ) )
-	     #( 'Cross Lane' #( 22 10 30 10 #oneWay )
-	        #( 30 10 39 18 ) )
-	     #( 'Coast Lane' #( 35 4 43 10 ) )
-	     #( 'Station Road' #( 18 22 13 12 ) #( 13 12 6 8 ) #( 13 12 22 10 ) ) )
+	^ #( #( 'Ring Road' #( 18 22 ) #( 19 30 ) #( 25 33 ) #( 31 29 )
+	        #( 32 21 ) #( 26 17 ) #( 18 22 ) )
+	     #( 'Market Street' #( 13 12 ) #( 18 22 ) #( 25 25 ) #( 32 21 ) )
+	     #( 'Market Square' #( 25 25 ) #( 25 33 ) )
+	     #( 'North Road' #( 18 22 ) #( 11 19 ) #( 4 22 ) )
+	     #( 'Hill Road' #( 19 30 ) #( 12 33 ) #( 5 38 ) #( 3 46 ) )
+	     #( 'Chapel Lane' #( 11 19 ) #( 9 26 ) #( 4 22 ) )
+	     #( 'Canal Street' #( 9 26 ) #( 12 33 ) #( 15 39 ) #( 22 41 ) )
+	     #( 'East Road' #( 25 33 ) #( 22 41 ) #( 17 47 ) #( 15 39 ) )
+	     #( 'Harbour Road' #( 31 29 ) #( 33 38 ) #( 38 45 ) )
+	     #( 'South Road' #( 31 29 ) #( 39 31 ) #( 46 27 ) #( 41 25 ) )
+	     #( 'Bridge Street' #( 39 18 ) #( 41 25 ) #( 39 31 ) #( 33 38 ) )
+	     #( 'West Road' #( 32 21 ) #( 39 18 ) #( 46 22 ) )
+	     #( 'Fort Road' #( 26 17 ) #( 22 10 ) #( 18 3 ) )
+	     #( 'Coast Road' #( 26 17 ) #( 30 10 ) #( 35 4 ) #( 43 10 )
+	        #( 39 18 ) )
+	     #( 'Cross Lane' #( 22 10 ) #( 30 10 ) #( 39 18 ) )
+	     #( 'Station Road' #( 6 8 ) #( 13 12 ) #( 22 10 ) ) )
 ]
 
 { #category : 'accessing' }

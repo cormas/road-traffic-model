@@ -1,5 +1,5 @@
 "
-I am a street of the town: a few roads that belong together and share a name. Most of me bend, so I am usually several of the straight roads of the town, and some of me branch, as a real street can.
+I am a street of the town: a few roads that belong together and share a name. Most of me bend, so I am usually several of the straight roads of the town. I never branch: I run from one end to the other, or round in a loop, and a road meeting me at a junction belongs to another street. If I am one-way, then all of my roads are, in the same direction.
 
 ## Responsibility:
 

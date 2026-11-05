@@ -11,7 +11,7 @@ I am one straight segment of road between two plots. A street that bends is a ch
 
 ## Collaborators:
 
-- `RTRoadTrafficModel`: creates me from its table of roads.
+- `RTRoadTrafficModel`: creates me from its table of streets.
 - `RTPlot`: my two ends.
 
 ## Public API and Key Messages
