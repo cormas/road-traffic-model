@@ -3,7 +3,7 @@ I am a town where people commute along a network of roads. Roads wear out with u
 
 ## Responsibility:
 
-- Create the town: a grid of plots and a network of roads drawn by hand in a table.
+- Create the town: a grid of plots and a network of roads drawn by hand in a table, grouped into streets, which together make up the town.
 - Know which plots are residential and which are industrial.
 - Create the people, each with a home and a workplace chosen at random.
 - Keep time: a Cormas step is a substep of a day, and `stepOfDay` tells which one.
@@ -55,7 +55,8 @@ Class {
 	#superclass : 'CMModel',
 	#instVars : [
 		'numberOfPeople',
-		'repairsPerDay'
+		'repairsPerDay',
+		'town'
 	],
 	#category : 'RoadTraffic-Model',
 	#package : 'RoadTraffic-Model'
@@ -117,12 +118,19 @@ RTRoadTrafficModel >> createPeople [
 
 { #category : 'init' }
 RTRoadTrafficModel >> createRoads [
+	"The town holds the streets, and each street holds its roads"
 
-	self roadTable do: [ :row |
-			self
-				newEntity: RTRoad
-				from: (self cellAt: row first at: row second)
-				to: (self cellAt: row third at: row fourth) ].
+	town := self newEntity: RTTown.
+	self streetTable do: [ :row |
+			| street |
+			street := self newEntity: RTStreet.
+			street name: row first.
+			row allButFirst do: [ :road |
+					street add: (self
+							 newEntity: RTRoad
+							 from: (self cellAt: road first at: road second)
+							 to: (self cellAt: road third at: road fourth)) ].
+			town add: street ].
 	RTRoad activePovSelector: #povWearAndTraffic
 ]
 
@@ -277,28 +285,9 @@ RTRoadTrafficModel >> residentialPlots [
 
 { #category : 'map' }
 RTRoadTrafficModel >> roadTable [
-	"The roads of the town, one straight segment per row: from row, from column, to row, to column. A street that bends is several rows that share a plot. A last #oneWay makes the road one-way from its first plot to its second, when the town uses one-way roads. Change a row to move a road."
+	"The roads of all the streets, in the order they are created"
 
-	^ #( #( 18 22 19 30 ) #( 19 30 25 33 ) #( 25 33 31 29 )
-	     #( 31 29 32 21 ) #( 32 21 26 17 ) #( 26 17 18 22 )
-	     #( 25 25 18 22 ) #( 25 25 25 33 #oneWay )
-	     #( 25 25 32 21 ) #( 18 22 11 19 ) #( 11 19 4 22 )
-	     #( 19 30 12 33 ) #( 12 33 5 38 ) #( 5 38 3 46 ) #( 11 19 9 26 )
-	     #( 9 26 12 33 #oneWay ) #( 9 26 4 22 ) #( 25 33 22 41 )
-	     #( 22 41 17 47 ) #( 12 33 15 39 ) #( 15 39 22 41 #oneWay )
-	     #( 15 39 17 47 ) #( 31 29 33 38 ) #( 33 38 38 45 )
-	     #( 31 29 39 31 ) #( 39 31 46 27 ) #( 33 38 39 31 )
-	     #( 41 25 39 31 #oneWay ) #( 41 25 39 18 ) #( 41 25 46 27 )
-	     #( 32 21 39 18 ) #( 39 18 46 22 ) #( 39 18 43 10 )
-	     #( 26 17 22 10 ) #( 22 10 18 3 ) #( 26 17 30 10 )
-	     #( 30 10 35 4 ) #( 22 10 30 10 #oneWay )
-	     #( 30 10 39 18 ) #( 35 4 43 10 ) #( 18 22 13 12 )
-	     #( 13 12 6 8 ) #( 13 12 22 10 ) )
-	"The ring around the centre, and the centre"
-	"North"
-	"East"
-	"South"
-	"West"
+	^ self streetTable flatCollect: [ :street | street allButFirst ]
 ]
 
 { #category : 'control' }
@@ -328,4 +317,40 @@ RTRoadTrafficModel >> stepWithMoveTowards [
 RTRoadTrafficModel >> stepsPerDay [
 
 	^ 100
+]
+
+{ #category : 'map' }
+RTRoadTrafficModel >> streetTable [
+	"The streets of the town: a name, then one row per straight road: from row, from column, to row, to column. A street that bends is several rows that share a plot. A last #oneWay makes the road one-way from its first plot to its second, when the town uses one-way roads. Change a row to move a road."
+
+	^ #( #( 'Ring Road' #( 18 22 19 30 ) #( 19 30 25 33 )
+	        #( 25 33 31 29 ) #( 31 29 32 21 ) #( 32 21 26 17 )
+	        #( 26 17 18 22 ) )
+	     #( 'Market Square' #( 25 25 18 22 ) #( 25 25 25 33 #oneWay )
+	        #( 25 25 32 21 ) )
+	     #( 'North Road' #( 18 22 11 19 ) #( 11 19 4 22 ) )
+	     #( 'Hill Road' #( 19 30 12 33 ) #( 12 33 5 38 ) #( 5 38 3 46 ) )
+	     #( 'Chapel Lane' #( 11 19 9 26 ) #( 9 26 12 33 #oneWay )
+	        #( 9 26 4 22 ) )
+	     #( 'East Road' #( 25 33 22 41 ) #( 22 41 17 47 ) )
+	     #( 'Canal Street' #( 12 33 15 39 ) #( 15 39 22 41 #oneWay )
+	        #( 15 39 17 47 ) )
+	     #( 'Harbour Road' #( 31 29 33 38 ) #( 33 38 38 45 ) )
+	     #( 'South Road' #( 31 29 39 31 ) #( 39 31 46 27 ) )
+	     #( 'Bridge Street' #( 33 38 39 31 ) #( 41 25 39 31 #oneWay ) )
+	     #( 'Mill Lane' #( 41 25 39 18 ) #( 41 25 46 27 ) )
+	     #( 'West Road' #( 32 21 39 18 ) #( 39 18 46 22 )
+	        #( 39 18 43 10 ) )
+	     #( 'Fort Road' #( 26 17 22 10 ) #( 22 10 18 3 ) )
+	     #( 'Old Road' #( 26 17 30 10 ) #( 30 10 35 4 ) )
+	     #( 'Cross Lane' #( 22 10 30 10 #oneWay )
+	        #( 30 10 39 18 ) )
+	     #( 'Coast Lane' #( 35 4 43 10 ) )
+	     #( 'Station Road' #( 18 22 13 12 ) #( 13 12 6 8 ) #( 13 12 22 10 ) ) )
+]
+
+{ #category : 'accessing' }
+RTRoadTrafficModel >> town [
+
+	^ town
 ]

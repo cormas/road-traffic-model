@@ -129,13 +129,6 @@ RTRoad >> isOneWay [
 	^ oneWay
 ]
 
-{ #category : 'accessing' }
-RTRoad >> length [
-	"The number of steps to walk from one end to the other."
-
-	^ self from distanceTo: self to
-]
-
 { #category : 'pov' }
 RTRoad >> povTraffic [
 

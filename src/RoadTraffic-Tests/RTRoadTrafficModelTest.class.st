@@ -78,6 +78,28 @@ RTRoadTrafficModelTest >> initializeWith: anInitSelector [
 ]
 
 { #category : 'tests' }
+RTRoadTrafficModelTest >> testEveryRoadIsInExactlyOneStreet [
+
+	self initializeWith: #initTown.
+
+	self assert: (model @@ RTRoad) isNotEmpty.
+	model @@ RTRoad do: [ :road |
+		self assert: (road networksOfClass: RTStreet) size equals: 1 ]
+]
+
+{ #category : 'tests' }
+RTRoadTrafficModelTest >> testEveryStreetIsOnePiece [
+
+	self initializeWith: #initTown.
+
+	self assert: model town members isNotEmpty.
+	model town members do: [ :street |
+			self
+				assert: (street links first from allLinksIn: street) size
+				equals: street links size ]
+]
+
+{ #category : 'tests' }
 RTRoadTrafficModelTest >> testEveryoneCanGetToWorkAndBack [
 
 	self initializeWith: #initTown.
@@ -195,4 +217,14 @@ RTRoadTrafficModelTest >> testStepOfDayRepeatsEveryDay [
 	self assert: model stepOfDay equals: 100.
 	model simulationContext currentTimeStep: 101.
 	self assert: model stepOfDay equals: 1
+]
+
+{ #category : 'tests' }
+RTRoadTrafficModelTest >> testTheTownHoldsEveryRoad [
+
+	self initializeWith: #initTown.
+
+	self assert: (model @@ RTRoad) isNotEmpty.
+	model @@ RTRoad do: [ :road |
+		self assert: (model town includes: road) ]
 ]
