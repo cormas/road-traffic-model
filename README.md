@@ -21,7 +21,7 @@ Open a simulation window:
 RTRoadTrafficModel scriptOpenSimulation
 ```
 
-Choose `initTown` and `stepAlongTheLine`, initialize the simulation and run it.
+Choose `initTown` and `step`, initialize the simulation and run it.
 
 ## The model
 
@@ -38,7 +38,7 @@ Choose `initTown` and `stepAlongTheLine`, initialize the simulation and run it.
 
 **A day** has 100 steps. Each person leaves home at their own step between 10 and 25, and leaves work at their own step between 60 and 80. Where a person is going depends only on the time of day, so someone who is late turns round at the next junction.
 
-**Walking.** At each junction, a person takes the first road of the cheapest route to their destination, found by `RTPlot>>cheapestRoadTo:`, which asks Cormas for the cheapest way through the town. People walk 2 to 3 cells per step on an unworn road, moving from cell to cell along it.
+**Walking.** At each junction, a person takes the first road of the cheapest route to their destination, found by `RTPlot>>cheapestRoadTo:`, which asks Cormas for the cheapest way through the town. People walk exactly on the drawn line of the road, 2.5 to 3.5 cell widths per step on an unworn road, and choose their next road when they reach the center of the junction.
 
 **Wear.** A road starts with a wear of 1, and each person entering it adds `wearPerUse`. Wear does two things:
 
@@ -54,10 +54,8 @@ Choose `initTown` and `stepAlongTheLine`, initialize the simulation and run it.
 - **Networks of links.** `RTStreet` and `RTTown` are subclasses of `CMNetwork`, each with its own points of view. A street is built with `addChainOf:through:`, and the town holds the streets.
 - **Finding a way in a network.** `wayTo:in:cost:` compares the costs of the roads at this moment, and only uses roads of the town, so home and work links are never part of a route.
 - **Direction as an attribute.** `RTRoad>>isDirected` answers whether the road is one-way, and ways respect it with no special code. Compare `initTown` with `initTownWithOneWays`, which is the same town with 4 streets running one way along their whole length.
-- **Steps made of substeps.** A Cormas step is a substep of a day here. `stepOfDay` derives the time of day from the current time step, and each control method sends `dayStep` when a new day starts. The same pattern works for months and years. The alternative, one Cormas step per day with a loop inside, would update the view once a day, and people would appear to teleport.
-- **Two ways of doing one thing.** The two control methods differ only in how people walk:
-  - `stepAlongTheLine` goes through the cells that the drawn line crosses, using `RTRoad>>cellsTowards:`.
-  - `stepWithMoveTowards` lets Cormas find the cells with `moveTowards:`. It needs no walking code of its own, but it goes diagonally first and then straight, so people leave sloped roads, and it runs more slowly.
+- **Steps made of substeps.** A Cormas step is a substep of a day here. `stepOfDay` derives the time of day from the current time step, and `step` sends `dayStep` when a new day starts. The same pattern works for months and years. The alternative, one Cormas step per day with a loop inside, would update the view once a day, and people would appear to teleport.
+- **Moving in a straight line.** `RTPerson>>walk` uses `moveStraight:towards:`, which moves a person by any distance, even a fraction of a cell, along the line to the center of the far end of the road. So people stay exactly on the drawn roads, and `isAtCenterOf:` tells when they reach a junction.
 
 ## What you see
 
@@ -87,7 +85,6 @@ The charts follow `Mean wear`, `Max wear`, `People at home`, `People at work` an
 
 - Set `repairsPerDay` to 2 and then to 8, and run for 20 days. How worn does the town get, and how many people get to work on time?
 - Set `repairsPerDay` to 0. What happens to the daily rhythm in the charts?
-- Compare `stepAlongTheLine` with `stepWithMoveTowards`, and look at the sloped roads.
 - Compare `initTown` with `initTownWithOneWays`.
 - Change `numberOfPeople` or `wearPerUse`.
 - Add a street to the table, or block one by removing its row. The tests check that everyone can still get to work and back.
