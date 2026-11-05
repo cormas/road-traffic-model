@@ -5,7 +5,7 @@ I am a person who lives in one place in the town, works in another, and walks be
 
 - Know my home and my workplace, through the links that connect me to them.
 - Know where to go, which only depends on the time of day.
-- Walk along one road at a time, and choose the next road at each junction.
+- Walk exactly on the drawn line of one road at a time, and choose the next road at each junction.
 - Show where I am going: light amber towards home and light blue towards work.
 
 ## Collaborators:
@@ -20,22 +20,20 @@ I am a person who lives in one place in the town, works in another, and walks be
 - `home` answers the plot where I live.
 - `workplace` answers the plot where I work.
 - `destination` answers where I should be going now.
-- `walkAlongTheLine` takes my walk for one step, through the cells of the road's line.
-- `walkWithMoveTowards` takes my walk for one step, letting Cormas find the cells.
+- `walk` takes my walk for one step, with `moveStraight:towards:` from Cormas.
 - `isAtHome`, `isAtWork` and `isOnRoad` tell what I am doing.
 
 ```
 person := model newEntity: RTPerson locatedAt: homePlot.
 model newEntity: RTHomeLink from: person to: homePlot.
 model newEntity: RTWorkLink from: person to: workPlot.
-person walkAlongTheLine
+person walk
 ```
 
 ## Internal Representation
 
 - `leaveHomeStep` and `leaveWorkStep`: the steps of the day when I leave. I draw them once, when I am created.
-- `speed`: the cells I walk per step on an unworn road.
-- `progress`: how much of the next cell I have already walked. Speeds are fractional, so I take a step each time it reaches 1.
+- `speed`: how far I walk per step on an unworn road, in cell widths. It can be a fraction, and wear divides it.
 - `road`: the road I am on, or nil when I am at a junction.
 - `roadEnd`: the plot at the far end of that road.
 
@@ -47,7 +45,6 @@ Class {
 		'leaveHomeStep',
 		'leaveWorkStep',
 		'speed',
-		'progress',
 		'road',
 		'roadEnd'
 	],
@@ -116,8 +113,7 @@ RTPerson >> initialize [
 	super initialize.
 	leaveHomeStep := self randomIntegerBetween: 10 and: 25.
 	leaveWorkStep := self randomIntegerBetween: 60 and: 80.
-	speed := self randomBetween: 2 and: 3.
-	progress := 0
+	speed := self randomBetween: 2.5 and: 3.5
 ]
 
 { #category : 'testing' }
@@ -164,34 +160,15 @@ RTPerson >> speed: aNumber [
 ]
 
 { #category : 'control' }
-RTPerson >> walk: aMoveOneCellBlock [
-	"Wear slows me down: progress grows by less on a worn road, and each whole unit of progress is one cell."
+RTPerson >> walk [
+	"I walk exactly on the drawn line of my road, towards its far end, and choose my next road when I reach the center of that end. Wear slows me down: on a road twice as worn, I cover half the distance."
 
 	self isOnRoad ifFalse: [ self enterRoadTowardsDestination ].
 	self isOnRoad ifFalse: [ ^ self ].
-	progress := progress + (speed / road wear).
-	[ self isOnRoad and: [ progress >= 1 ] ] whileTrue: [
-			aMoveOneCellBlock value.
-			progress := progress - 1.
-			self cell = roadEnd ifTrue: [
-					road := nil.
-					self enterRoadTowardsDestination ] ].
-	self isOnRoad ifFalse: [ progress := 0 ]
-]
-
-{ #category : 'control' }
-RTPerson >> walkAlongTheLine [
-	"The road tells me the cells that its drawn line crosses, so I stay on it."
-
-	self walk: [
-		self moveTo: ((road cellsTowards: roadEnd) after: self cell) ]
-]
-
-{ #category : 'control' }
-RTPerson >> walkWithMoveTowards [
-	"Cormas finds the cells to walk through. It takes the diagonal part of the way first, so on a sloped road I leave the drawn line, and return to it at the far end."
-
-	self walk: [ self moveTowards: roadEnd ]
+	self moveStraight: speed / road wear towards: roadEnd.
+	(self isAtCenterOf: roadEnd) ifTrue: [
+			road := nil.
+			self enterRoadTowardsDestination ]
 ]
 
 { #category : 'accessing' }

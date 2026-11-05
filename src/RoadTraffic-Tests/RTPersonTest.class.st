@@ -42,15 +42,16 @@ Class {
 }
 
 { #category : 'private' }
-RTPersonTest >> distanceOf: aPlot fromLineBetween: aCell and: anotherCell [
-	"In cells"
+RTPersonTest >> distanceOf: aWalker fromLineBetween: aCell and: anotherCell [
+	"In cell widths, from where the walker is drawn to the line drawn between the centers of the two cells"
 
-	| a b p |
-	a := aCell rowNumber @ aCell columnNumber.
-	b := anotherCell rowNumber @ anotherCell columnNumber.
-	p := aPlot rowNumber @ aPlot columnNumber.
+	| grid a b p |
+	grid := aCell spaceModel neighbourhoodConfiguration.
+	a := grid centerOnGridOf: aCell.
+	b := grid centerOnGridOf: anotherCell.
+	p := grid gridPositionOf: aWalker cell at: aWalker positionInCell.
 	^ (p x - a x * (b y - a y) - (p y - a y * (b x - a x))) abs
-	  / ((b x - a x) squared + (b y - a y) squared) sqrt
+	  / (b - a) r
 ]
 
 { #category : 'private' }
@@ -156,13 +157,13 @@ RTPersonTest >> testFasterPersonWalksMoreCells [
 RTPersonTest >> testIsAtHomeOnTheRoadOrAtWork [
 
 	self timeStep: 5.
-	person walkWithMoveTowards.
+	person walk.
 	self assert: person isAtHome.
 	self deny: person isOnRoad.
 	self deny: person isAtWork.
 
 	self timeStep: 10.
-	person walkWithMoveTowards.
+	person walk.
 	self assert: person isOnRoad.
 	self deny: person isAtHome.
 	self deny: person isAtWork.
@@ -203,52 +204,55 @@ RTPersonTest >> testStaysAtHomeBeforeLeaving [
 ]
 
 { #category : 'tests' }
-RTPersonTest >> testWalkingAlongTheLineStaysOnASlopedRoadAndArrives [
+RTPersonTest >> testStepsLeftAtAJunctionAreLost [
+	"At a speed of 1.5, the second step reaches the junction with half a cell to spare, and the person starts the next road from there at the next step"
 
-	| from to walker |
-	from := model cellAt: 3 at: 1.
-	to := model cellAt: 5 at: 8.
-	walker := self personOnSlopedRoadFrom: from to: to.
 	self timeStep: 10.
-
-	7 timesRepeat: [
-			walker walkAlongTheLine.
-			self assert:
-				(self distanceOf: walker cell fromLineBetween: from and: to) < 1 ].
-
-	self assert: walker cell equals: to
+	person speed: 1.5.
+	self walkTimes: 2.
+	self assert: (person isAtCenterOf: junction).
+	self walkTimes: 1.
+	self assert: person cell equals: (model cellAt: 1 at: 5).
+	self assert:
+		(person positionInCell x closeTo: 1.0 precision: 0.000001)
 ]
 
 { #category : 'tests' }
-RTPersonTest >> testWalkingAlongTheLineWorksInBothDirections [
+RTPersonTest >> testWalksExactlyOnASlopedRoadAndArrives [
+	"The road is about 7.3 cells long, so at a speed of 1 it takes 8 steps"
 
 	| from to walker |
 	from := model cellAt: 3 at: 1.
 	to := model cellAt: 5 at: 8.
 	walker := self personOnSlopedRoadFrom: from to: to.
 	self timeStep: 10.
-	7 timesRepeat: [ walker walkAlongTheLine ].
+	7 timesRepeat: [
+			walker walk.
+			self assert: walker isOnRoad.
+			self assert:
+				(self distanceOf: walker fromLineBetween: from and: to) < 0.000001 ].
+	walker walk.
+	self assert: walker isAtWork.
+	self assert: (walker isAtCenterOf: to)
+]
 
+{ #category : 'tests' }
+RTPersonTest >> testWalksExactlyOnASlopedRoadInBothDirections [
+
+	| from to walker |
+	from := model cellAt: 3 at: 1.
+	to := model cellAt: 5 at: 8.
+	walker := self personOnSlopedRoadFrom: from to: to.
+	self timeStep: 10.
+	8 timesRepeat: [ walker walk ].
 	self timeStep: 61.
 	7 timesRepeat: [
-			walker walkAlongTheLine.
+			walker walk.
 			self assert:
-				(self distanceOf: walker cell fromLineBetween: from and: to) < 1 ].
-
-	self assert: walker cell equals: from
-]
-
-{ #category : 'tests' }
-RTPersonTest >> testWalkingWithMoveTowardsArrivesOnASlopedRoad [
-
-	| to walker |
-	to := model cellAt: 5 at: 8.
-	walker := self personOnSlopedRoadFrom: (model cellAt: 3 at: 1) to: to.
-	self timeStep: 10.
-
-	7 timesRepeat: [ walker walkWithMoveTowards ].
-
-	self assert: walker cell equals: to
+				(self distanceOf: walker fromLineBetween: from and: to) < 0.000001 ].
+	walker walk.
+	self assert: walker isAtHome.
+	self assert: (walker isAtCenterOf: from)
 ]
 
 { #category : 'tests' }
@@ -283,5 +287,5 @@ RTPersonTest >> timeStep: aNumber [
 { #category : 'private' }
 RTPersonTest >> walkTimes: aNumber [
 
-	aNumber timesRepeat: [ person walkWithMoveTowards ]
+	aNumber timesRepeat: [ person walk ]
 ]

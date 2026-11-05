@@ -6,7 +6,6 @@ I am one straight segment of road between two plots. A street that bends is a ch
 - Connect two junctions of the town, which can be many cells apart.
 - Know whether traffic may only go from my `from` end to my `to` end.
 - Wear out with each use, which makes me more costly to travel, until I am repaired.
-- Know the cells that my straight line crosses.
 - Show my wear as a color and my traffic as a width.
 
 ## Collaborators:
@@ -17,7 +16,6 @@ I am one straight segment of road between two plots. A street that bends is a ch
 ## Public API and Key Messages
 
 - `length` answers the number of steps to walk from one end to the other.
-- `cellsTowards:` answers the cells of my straight line, in order, ending at the given end.
 - `wear` starts at 1, and `recordUse` raises it by the parameter `wearPerUse`.
 - `cost` answers `length * wear`, which is what choosing a route compares.
 - `repair` sets `wear` back to 1.
@@ -87,25 +85,6 @@ RTRoad class >> wearPerUse: aNumber [
 RTRoad >> beOneWay [
 
 	oneWay := true
-]
-
-{ #category : 'accessing' }
-RTRoad >> cellsTowards: anEnd [
-	"The cells that my straight line crosses, in order, from my other end to anEnd. There is one cell per step, so a person can walk them one by one."
-
-	| start steps |
-	start := self otherEndOf: anEnd.
-	steps := self length.
-	^ (0 to: steps) collect: [ :step |
-			  | fraction |
-			  fraction := step / steps.
-			  self cormasModel
-				  cellAt:
-					  (start rowNumber
-					   + (anEnd rowNumber - start rowNumber * fraction)) rounded
-				  at: (start columnNumber
-					   + (anEnd columnNumber - start columnNumber * fraction))
-						  rounded ]
 ]
 
 { #category : 'accessing' }

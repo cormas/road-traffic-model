@@ -36,22 +36,6 @@ Class {
 }
 
 { #category : 'private' }
-RTRepairTest >> assertRepairsOnlyAtTheStartOfADayWith: aControlSelector [
-
-	model simulationContext currentTimeStep: 2.
-	model perform: aControlSelector.
-	self assert: worst wear equals: 3.
-
-	model simulationContext currentTimeStep: 100.
-	model perform: aControlSelector.
-	self assert: worst wear equals: 3.
-
-	model simulationContext currentTimeStep: 101.
-	model perform: aControlSelector.
-	self assert: worst wear equals: 1
-]
-
-{ #category : 'private' }
 RTRepairTest >> meanWearAfterFiveDaysWithRepairsPerDay: aNumber [
 
 	| town simulation |
@@ -60,7 +44,7 @@ RTRepairTest >> meanWearAfterFiveDaysWithRepairsPerDay: aNumber [
 	simulation
 		randomSeed: 42;
 		activeInitSelector: #initTown;
-		activeControlSelector: #stepAlongTheLine;
+		activeControlSelector: #step;
 		initializeSimulation.
 	town repairsPerDay: aNumber.
 	500 timesRepeat: [ simulation runStep ].
@@ -133,15 +117,19 @@ RTRepairTest >> testRepairsKeepTheTownInBetterCondition [
 ]
 
 { #category : 'tests' }
-RTRepairTest >> testRepairsOnlyAtTheStartOfADayWhenWalkingAlongTheLine [
+RTRepairTest >> testRepairsOnlyAtTheStartOfADay [
 
-	self assertRepairsOnlyAtTheStartOfADayWith: #stepAlongTheLine
-]
+	model simulationContext currentTimeStep: 2.
+	model step.
+	self assert: worst wear equals: 3.
 
-{ #category : 'tests' }
-RTRepairTest >> testRepairsOnlyAtTheStartOfADayWhenWalkingWithMoveTowards [
+	model simulationContext currentTimeStep: 100.
+	model step.
+	self assert: worst wear equals: 3.
 
-	self assertRepairsOnlyAtTheStartOfADayWith: #stepWithMoveTowards
+	model simulationContext currentTimeStep: 101.
+	model step.
+	self assert: worst wear equals: 1
 ]
 
 { #category : 'tests' }

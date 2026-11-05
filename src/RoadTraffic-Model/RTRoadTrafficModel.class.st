@@ -21,8 +21,8 @@ I am a town where people commute along a network of roads. Roads wear out with u
 
 - `initTown` creates the town with two-way roads.
 - `initTownWithOneWays` creates the same town, with the streets of `oneWayStreetNames` running one way along their whole length.
-- `stepAlongTheLine` and `stepWithMoveTowards` run one step, and differ only in how people walk along a road.
-- `dayStep` holds what happens once a day. Both steps send it at the start of each day.
+- `step` runs one step, in which every person walks.
+- `dayStep` holds what happens once a day. `step` sends it at the start of each day.
 - `residentialPlots` and `industrialPlots` answer the places where people live and work.
 - `stepOfDay` answers the step of the current day.
 - `numberOfPeople` and `repairsPerDay` are parameters, and so is `wearPerUse` on `RTRoad`.
@@ -35,7 +35,7 @@ model := RTRoadTrafficModel new.
 simulation := CMSimulation for: model.
 simulation
 	activeInitSelector: #initTown;
-	activeControlSelector: #stepAlongTheLine;
+	activeControlSelector: #step;
 	initializeSimulation.
 simulation runStep.
 model peopleOnTheRoad
@@ -48,7 +48,7 @@ model peopleOnTheRoad
 
 ### Implementation Points
 
-Many models work in days, months or years made of smaller steps, and Cormas runs one step at a time. So `stepOfDay` derives the day from the current time step, and each control method sends `dayStep` when `isStartOfDay` is true. The view and charts still update at every step, so people are seen walking.
+Many models work in days, months or years made of smaller steps, and Cormas runs one step at a time. So `stepOfDay` derives the day from the current time step, and `step` sends `dayStep` when `isStartOfDay` is true. The view and charts still update at every step, so people are seen walking.
 
 "
 Class {
@@ -76,7 +76,7 @@ RTRoadTrafficModel class >> exampleTown [
 	model := self new.
 	(CMSimulation for: model)
 		activeInitSelector: #initTown;
-		activeControlSelector: #stepAlongTheLine;
+		activeControlSelector: #step;
 		initializeSimulation.
 	^ model
 ]
@@ -298,11 +298,11 @@ RTRoadTrafficModel >> sizeForUses: aNumber [
 ]
 
 { #category : 'control' }
-RTRoadTrafficModel >> stepAlongTheLine [
+RTRoadTrafficModel >> step [
 
 	<control>
 	self isStartOfDay ifTrue: [ self dayStep ].
-	self @@ RTPerson do: [ :person | person walkAlongTheLine ]
+	self @@ RTPerson do: [ :person | person walk ]
 ]
 
 { #category : 'time' }
@@ -310,14 +310,6 @@ RTRoadTrafficModel >> stepOfDay [
 	"A Cormas step is a substep of my day. The current time step grows for ever, so the step of the day, from 1 to stepsPerDay, comes from it. Months or years would work the same way."
 
 	^ self currentTimeStep - 1 \\ self stepsPerDay + 1
-]
-
-{ #category : 'control' }
-RTRoadTrafficModel >> stepWithMoveTowards [
-
-	<control>
-	self isStartOfDay ifTrue: [ self dayStep ].
-	self @@ RTPerson do: [ :person | person walkWithMoveTowards ]
 ]
 
 { #category : 'time' }

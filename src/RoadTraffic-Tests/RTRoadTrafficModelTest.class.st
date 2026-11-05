@@ -45,29 +45,6 @@ RTRoadTrafficModelTest >> assertEveryHomeReachesEveryWorkplaceAndBack [
 ]
 
 { #category : 'private' }
-RTRoadTrafficModelTest >> assertPeopleCommuteOverADayWith: aControlSelector [
-
-	| simulation people |
-	model := RTRoadTrafficModel new.
-	simulation := CMSimulation for: model.
-	simulation
-		randomSeed: 42;
-		activeInitSelector: #initTown;
-		activeControlSelector: aControlSelector;
-		initializeSimulation.
-	people := model @@ RTPerson.
-
-	60 timesRepeat: [ simulation runStep ].
-	self assert:
-		(people count: [ :person | person cell = person workplace ])
-		> (people size / 2).
-
-	40 timesRepeat: [ simulation runStep ].
-	self assert: (people count: [ :person | person cell = person home ])
-		> (people size / 2)
-]
-
-{ #category : 'private' }
 RTRoadTrafficModelTest >> initializeWith: anInitSelector [
 
 	model := RTRoadTrafficModel new.
@@ -158,7 +135,7 @@ RTRoadTrafficModelTest >> testEveryoneIsAtHomeOrAtWorkOrOnTheRoadAtAnyTime [
 	simulation
 		randomSeed: 42;
 		activeInitSelector: #initTown;
-		activeControlSelector: #stepAlongTheLine;
+		activeControlSelector: #step;
 		initializeSimulation.
 
 	self assert: model peopleAtHome equals: (model @@ RTPerson) size.
@@ -212,13 +189,24 @@ RTRoadTrafficModelTest >> testOneWayRoadGoesFromItsFirstPlotToItsSecond [
 { #category : 'tests' }
 RTRoadTrafficModelTest >> testPeopleGoToWorkAndComeBackHomeOverADay [
 
-	self assertPeopleCommuteOverADayWith: #stepWithMoveTowards
-]
+	| simulation people |
+	model := RTRoadTrafficModel new.
+	simulation := CMSimulation for: model.
+	simulation
+		randomSeed: 42;
+		activeInitSelector: #initTown;
+		activeControlSelector: #step;
+		initializeSimulation.
+	people := model @@ RTPerson.
 
-{ #category : 'tests' }
-RTRoadTrafficModelTest >> testPeopleGoToWorkAndComeBackHomeOverADayAlongTheLines [
+	60 timesRepeat: [ simulation runStep ].
+	self assert:
+		(people count: [ :person | person cell = person workplace ])
+		> (people size / 2).
 
-	self assertPeopleCommuteOverADayWith: #stepAlongTheLine
+	40 timesRepeat: [ simulation runStep ].
+	self assert: (people count: [ :person | person cell = person home ])
+		> (people size / 2)
 ]
 
 { #category : 'tests' }
