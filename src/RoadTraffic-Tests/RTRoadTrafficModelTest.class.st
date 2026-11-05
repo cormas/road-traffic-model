@@ -104,6 +104,24 @@ RTRoadTrafficModelTest >> testEveryRoadIsInExactlyOneStreet [
 ]
 
 { #category : 'tests' }
+RTRoadTrafficModelTest >> testEveryStreetIsALineOrALoop [
+	"A street never branches: each of its plots touches at most two of its roads. It is in one piece, so it has two ends, or none when it is a loop."
+
+	| town streets |
+	town := RTRoadTrafficModel new.
+	town initTown.
+	streets := town @@ RTStreet.
+	self deny: streets isEmpty.
+	streets do: [ :street |
+			street entities do: [ :plot |
+				self assert: (plot linksIn: street) size <= 2 ].
+			self
+				assert: (street entities first allLinkedEntitiesIn: street) size
+				equals: street entities size - 1.
+			self assert: (#( 0 2 ) includes: street terminals size) ]
+]
+
+{ #category : 'tests' }
 RTRoadTrafficModelTest >> testEveryStreetIsOnePiece [
 
 	self initializeWith: #initTown.

@@ -14,7 +14,7 @@ I am the whole town, made of all its streets. I am what people look for a way th
 
 - `members` answers my streets.
 - `links` answers all the roads of the town, as for any network.
-- `meanWear` and `povWear` come from `RTRoadNetwork`. Selecting `povWear` shows how the whole town is doing, as one color.
+- `meanWear`, `meanUses` and `povWearAndTraffic` come from `RTRoadNetwork`. Selecting `povWearAndTraffic` shows how the whole town is doing, as one color and one width.
 
 ```
 model town members. ""the streets""

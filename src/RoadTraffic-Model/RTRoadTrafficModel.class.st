@@ -65,7 +65,7 @@ Class {
 { #category : 'accessing' }
 RTRoadTrafficModel class >> aboutThisModel [
 
-	^ 'People commute between home and work along a network of roads drawn on a 50x50 grid. Each road is a link between two plots. Roads wear out with use, which slows people down and pushes traffic onto other routes, and the council repairs the most worn roads each day. A day has 100 steps. Adapted to the grid of Cormas from the Road Traffic tutorial of GAMA.'
+	^ 'People commute between home and work along a network of roads drawn on a 50x50 grid. Each road is a link between two plots, roads make up streets, and streets make up the town. Roads wear out with use, which slows people down and pushes traffic onto other routes, and the council repairs the most worn roads each day. A day has 100 steps. Adapted to the grid of Cormas from the Road Traffic tutorial of GAMA.'
 ]
 
 { #category : 'examples' }
